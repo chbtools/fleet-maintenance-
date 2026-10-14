@@ -157,7 +157,7 @@ td.r,th.r{text-align:right}
 .total-line b{font-family:var(--display);font-size:1.6rem}
 .err{color:var(--bad);font-size:.86rem}
 .dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:.9rem}
-.dl dt{color:var(--muted)} .dl dd{margin:0;overflow-wrap:anywhere}
+.dl dt{color:var(--muted)} .dl dd{margin:0;overflow-wrap:anywhere;white-space:pre-line}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--steel);color:var(--on-steel);padding:10px 16px;border-radius:var(--r);z-index:60;font-size:.92rem;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .banner{background:var(--warn-soft);color:var(--ink);border:1px solid var(--warn);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;font-size:.9rem}
 .copybox{width:100%;min-height:160px;font-family:var(--mono);font-size:.8rem}
@@ -207,9 +207,10 @@ td.r,th.r{text-align:right}
 @media (max-width:520px){.brand h1{font-size:1.2rem}.brand small{font-size:.7rem}.log-btn{font-size:1rem;padding:8px 12px}.tab{font-size:1rem;padding:8px 7px}.tabs{gap:0}}
 .pwo table{table-layout:fixed}.pwo td{overflow-wrap:anywhere}
 #printArea{display:none}
+@page{size:letter;margin:0}
 @media print{
   body>*:not(#printArea){display:none!important}
-  #printArea{display:block!important;color:#000;background:#fff;font-family:Arial,Helvetica,sans-serif;font-size:12pt}
+  #printArea{display:block!important;color:#000;background:#fff;font-family:Arial,Helvetica,sans-serif;font-size:12pt;padding:14mm 14mm 10mm}
   :root{padding:0!important}
   body{background:#fff!important}
 }
@@ -217,7 +218,7 @@ td.r,th.r{text-align:right}
 .pwo .hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #000;padding-bottom:6px;margin-bottom:10px}
 .pwo .won{font-size:22pt;font-weight:bold;font-family:"Courier New",monospace}
 .pwo table{width:100%;border-collapse:collapse;margin:6px 0 12px}
-.pwo td,.pwo th{border:1px solid #000;padding:6px 7px;text-align:left;vertical-align:top;font-size:11pt}
+.pwo td,.pwo th{border:1px solid #000;padding:6px 7px;text-align:left;vertical-align:top;font-size:11pt;white-space:normal}
 .pwo th{background:#eee;font-size:9pt;text-transform:uppercase;letter-spacing:.04em;width:18%}
 .pwo h2{font-size:11pt;text-transform:uppercase;letter-spacing:.05em;margin:12px 0 4px}
 .pwo .box{border:1px solid #000;min-height:70px;padding:6px 7px;white-space:pre-wrap}
@@ -257,7 +258,7 @@ td.r,th.r{text-align:right}
 (function(){
 const TYPES=["Forklift","Air compressor","Truck","Trailer","Loader / skid steer","Generator","Crane / hoist","Mower","Other"];
 const KINDS=["Repair","Service","Inspection"];
-const S={units:[],records:[],employees:[],me:"",pendingWO:null,wo:{view:"open"},tab:"fleet",canWrite:true,db:null,dl:null,loaded:{u:false,r:false},status:"loading",
+const S={units:[],records:[],employees:[],checks:[],me:"",pendingWO:null,wo:{view:"open"},tab:"fleet",canWrite:true,db:null,dl:null,loaded:{u:false,r:false},status:"loading",
   hist:{q:"",unit:"all",kind:"all"},rep:{range:"ytd",unit:"all",from:"",to:""}};
 
 /* ---------- helpers ---------- */
@@ -275,7 +276,9 @@ const daysBetween=(a,b)=>{const p=s=>{const[y,m,d]=s.split("-").map(Number);retu
 const total=r=>numv(r.partsCost)+numv(r.laborCost)+numv(r.otherCost);
 const wo=r=>"WO-"+String(r.id||"").replace(/[^a-z0-9]/gi,"").slice(-5).toUpperCase();
 const unitById=id=>S.units.find(u=>u.id===id);
-const unitLabel=id=>{const u=unitById(id);return u?u.unit:"(removed)"};
+const unitLabel=id=>{const u=unitById(id);if(u)return u.unit;if(String(id||"").startsWith("?"))return String(id).slice(1)+" (not in fleet)";return"(removed)"};
+const checksFor=id=>S.checks.filter(c=>c.unitId===id).sort((a,b)=>String(b.at||b.date).localeCompare(String(a.at||a.date)));
+const fmtTime=s=>{const d=new Date(s);return isNaN(d)?"":d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})};
 const meterUnit=u=>u&&u.meterType==="Miles"?"mi":u&&u.meterType==="Hours"?"hrs":"";
 function toast(msg){$("#toastRoot").innerHTML="";const t=document.createElement("div");t.className="toast";t.textContent=msg;$("#toastRoot").appendChild(t);setTimeout(()=>t.remove(),2600)}
 function sortedUnits(){return S.units.slice().sort((a,b)=>String(a.unit).localeCompare(String(b.unit),undefined,{numeric:true}))}
@@ -356,6 +359,8 @@ function renderFleet(){
     return`<button class="unit" type="button" data-unit="${h(u.id)}">
       <div class="unit-top"><span class="tag">${h(u.unit)}</span><div class="unit-name">${h(u.name||u.type||"")}<small>${h([u.make,u.model,u.year].filter(Boolean).join(" "))}</small></div>${statusPill(u.status)}</div>
       ${pm?`<div class="pm"><span class="pill ${pm.level}">${pm.level==="ok"?"PM":"PM"}</span><span>${h(pm.text.replace(/^PM [a-z ]+· /,""))}</span></div>`:""}
+      ${(()=>{const cs=checksFor(u.id);if(!cs.length)return"";const c=cs[0],td=c.date===t;
+        return`<div class="pm"><span class="pill ${!td?"warn":c.result==="Pass"?"ok":"bad"}">Daily check</span><span>${td?`${h(c.result)} · ${h(fmtTime(c.at))}${c.driver?" · "+h(c.driver):""}`:`None today · last ${h(fmtShort(c.date))}`}</span></div>`})()}
       <div class="unit-meta num"><span>${m?`<b>${m.toLocaleString()}</b> ${meterUnit(u)}`:"No meter"}</span><span>Last: <b>${last?fmtShort(last.date):"—"}</b></span><span>YTD <b>${money0(ytd)}</b></span></div>
     </button>`}).join("")}</div>`;
   const a=$("#addUnit");if(a)a.onclick=()=>unitForm();
@@ -518,7 +523,7 @@ async function copyText(text){
    Shared by the browser writer (ExcelJS) and the offline test. */
 function fleetWorkbookSpec(units, records, todayIso, helpers) {
   const { total, wo, pmText, meterUnit } = helpers;
-  const MONEY = '"$"#,##0.00', DATE = 'mm/dd/yyyy', MONTH = 'mmm yyyy', INT = '#,##0';
+  const MONEY = '"$"#,##0.00', MONEY0 = '"$"#,##0', DATE = 'mm/dd/yyyy', MONTH = 'mmm yyyy', INT = '#,##0';
   const colL = n => { let s = ''; n++; while (n) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; };
   const byId = {}; units.forEach(u => byId[u.id] = u);
   const label = r => (byId[r.unitId] && byId[r.unitId].unit) || r.unitNumber || '(removed)';
@@ -562,16 +567,16 @@ function fleetWorkbookSpec(units, records, todayIso, helpers) {
   /* ---- Dashboard ---- */
   const R = 5000, W = n => `'Work Log'!$${n}$2:$${n}$${R}`;
   const D = W('A'), UN = W('C'), TY = W('E'), ST = W('F'), TOT = W('N'), WHO = W('P'), DUE = W('R');
-  const db = { name: 'Dashboard', cols: [14, 30, 14, 34, 9, 14, 16, 14, 14, 13], cells: [] };
+  const db = { name: 'Dashboard', cols: [14, 30, 14, 34, 9, 14, 16, 16, 16, 13], cells: [] };
   db.cells.push({ r: 0, c: 0, v: 'Fleet Maintenance Log', title: true });
   db.cells.push({ r: 1, c: 0, v: `Exported ${todayIso}. Dollar figures and counts are formulas over the Work Log and Units tabs, so they update if you add or edit rows there.`, muted: true });
   const kpis = [
     ['Units', `COUNTA(Units!$A$2:$A$${R})`, INT],
     ['Down now', `COUNTIF(Units!$H$2:$H$${R},"Down")`, INT],
     ['Open work orders', `COUNTIFS(${ST},"<>Completed",${ST},"<>")`, INT],
-    ['This month', `SUMIFS(${TOT},${D},">="&DATE(YEAR(TODAY()),MONTH(TODAY()),1))`, MONEY],
-    ['Year to date', `SUMIFS(${TOT},${D},">="&DATE(YEAR(TODAY()),1,1))`, MONEY],
-    ['All time', `SUM(${TOT})`, MONEY]];
+    ['This month', `SUMIFS(${TOT},${D},">="&DATE(YEAR(TODAY()),MONTH(TODAY()),1))`, MONEY0],
+    ['Year to date', `SUMIFS(${TOT},${D},">="&DATE(YEAR(TODAY()),1,1))`, MONEY0],
+    ['All time', `SUM(${TOT})`, MONEY0]];
   // KPI tiles laid out in pairs of columns: A, C, F, H … keep simple: one per column A..F
   const kc = [0, 2, 4, 6, 7, 8];
   kpis.forEach(([l, f, fmt], i) => { db.cells.push({ r: 3, c: kc[i], v: l, kpiLabel: true }); db.cells.push({ r: 4, c: kc[i], f, fmt, kpi: true }); });
@@ -744,7 +749,7 @@ function woDetail(id,opt={}){
   const open=r.status==="open",cw=S.canWrite;
   const msg=woMessage(r),subj=`Work order ${wo(r)} – ${unitLabel(r.unitId)}`;
   const ph=emp&&phoneDigits(emp.phone),em=emp&&emp.email;
-  const dl=[["Unit",`${unitLabel(r.unitId)}${u&&u.name?" — "+u.name:""}`],["Type",r.kind],["Assigned to",name||"Unassigned"],["Requested by",r.requestedBy],
+  const dl=[["Unit",`${unitLabel(r.unitId)}${u&&u.name?" — "+u.name:""}`],["Type",r.kind],["Assigned to",name||"Unassigned"],["Requested by",r.requestedBy],["Source",r.source],["Reported again",r.checkLog],
     ["Opened",fmtDate(r.date)],["Due",r.dueDate?fmtDate(r.dueDate):""],["Meter",r.meter?numv(r.meter).toLocaleString()+" "+meterUnit(u):""],
     ["Work performed",r.workDone],["Parts used",r.parts],["Labor hours",r.laborHours||""],["Vendor / tech",r.vendor],
     ["Cost",total(r)?money(total(r)):""],["Completed",r.completedAt?fmtDate(String(r.completedAt).slice(0,10)):""]].filter(x=>x[1]);
@@ -783,6 +788,7 @@ function woDetail(id,opt={}){
 
 function printWO(r){
   const u=unitById(r.unitId)||{};const e=h;
+  const partRows=String(r.parts||"").split(/[,;\n]+/).map(t=>t.trim()).filter(Boolean).slice(0,10);
   const blankRows=n=>Array.from({length:n},()=>`<tr><td>&nbsp;</td><td></td><td></td><td></td></tr>`).join("");
   $("#printArea").innerHTML=`<div class="pwo">
     <div class="hd"><div><h1>Work Order</h1><div>Fleet Maintenance Log</div></div><div class="won">${e(wo(r))}</div></div>
@@ -795,7 +801,7 @@ function printWO(r){
     </table>
     <h2>Problem / work requested</h2><div class="box">${e(r.description||"")}</div>
     <h2>Work performed</h2>${r.workDone?`<div class="box">${e(r.workDone)}</div>`:`<div class="lines">${"<div></div>".repeat(5)}</div>`}
-    <h2>Parts used</h2><table><tr><th style="width:10%">Qty</th><th style="width:25%">Part #</th><th>Description</th><th style="width:15%">Cost</th></tr>${r.parts?`<tr><td></td><td></td><td>${e(r.parts)}</td><td>${numv(r.partsCost)?money(numv(r.partsCost)):""}</td></tr>`:""}${blankRows(r.parts?3:5)}</table>
+    <h2>Parts used</h2><table><tr><th style="width:10%">Qty</th><th style="width:22%">Part #</th><th>Description</th><th style="width:16%">Cost</th></tr>${partRows.map(t=>`<tr><td colspan="3">${e(t)}</td><td></td></tr>`).join("")}${blankRows(Math.max(2,5-partRows.length))}${numv(r.partsCost)?`<tr><td colspan="3" style="text-align:right;font-weight:bold">Parts total</td><td><b>${money(numv(r.partsCost))}</b></td></tr>`:""}</table>
     <table><tr><th>Labor hours</th><td>${e(r.laborHours||"")}</td><th>Meter at finish</th><td>${e(r.meter||"")} ${e(meterUnit(u))}</td></tr></table>
     <div class="sig"><div>Technician signature &nbsp;/&nbsp; date</div><div>Supervisor sign-off &nbsp;/&nbsp; date</div></div>
     <div class="ft">Printed ${e(fmtDate(today()))} · ${e(woLink(r))}</div></div>`;
@@ -973,6 +979,10 @@ function unitDetail(id){
     ${S.canWrite?`<div class="f"><span class="lbl">Set status</span><div class="seg" id="dStat">${["Running","Down","Out of service"].map(s=>`<button type="button" data-s="${s}" aria-pressed="${(u.status||"Running")===s}">${s}</button>`).join("")}</div></div>`:""}
     <div class="split num" style="margin-top:0"><div class="i">Lifetime<b>${money0(life)}</b>${rs.length} jobs</div><div class="s">This year<b>${money0(ytd)}</b></div><div class="r">Repairs<b>${money0(rep)}</b>lifetime</div></div>
     <dl class="dl">${[["Type",u.type],["Make / model",[u.make,u.model].filter(Boolean).join(" ")],["Year",u.year],["Serial",u.serial],["Meter",m?m.toLocaleString()+" "+meterUnit(u):""],["PM interval",[u.pmMeter?u.pmMeter+" "+meterUnit(u):"",u.pmDays?u.pmDays+" days":""].filter(Boolean).join(" or ")],["Notes",u.notes]].filter(x=>x[1]).map(([k,v])=>`<dt>${k}</dt><dd>${h(v)}</dd>`).join("")}</dl>
+    ${(()=>{const cs=checksFor(id).slice(0,6);if(!cs.length)return"";return`<div><span class="lbl">Daily checks</span></div><div class="rows">${cs.map(c=>`<div class="row" style="cursor:default">
+      <div class="d num"><b>${fmtShort(c.date)}</b>${h(fmtTime(c.at))}</div>
+      <div class="w"><div class="t">${h(c.driver||"Driver")}${c.shift?` · ${h(c.shift)} shift`:""}</div><div class="s">${c.hours?`<span class="num">${numv(c.hours).toLocaleString()} ${meterUnit(u)}</span>`:""}${c.defects?`<span>${h(String(c.defects).split("\n").length)} defect${String(c.defects).split("\n").length>1?"s":""}</span>`:""}</div></div>
+      <div class="c"><span class="pill ${c.result==="Pass"?"ok":c.result==="Defects"?"warn":"bad"}">${h(c.result)}</span></div></div>`).join("")}</div>`})()}
     <div><span class="lbl">Work history</span></div>${rowsHtml(rs,false)}`,
     `${S.canWrite?`<button class="btn small" id="dEdit" type="button">Edit unit</button>`:""}<span class="sp"></span>${S.canWrite?`<button class="btn primary" id="dLog" type="button">+ Work order on ${h(u.unit)}</button>`:`<button class="btn" data-close type="button">Close</button>`}`,
     sc=>{
@@ -1024,7 +1034,7 @@ const api={collection(name){return{doc(id){id=id||genId();return{id,
   delete:async()=>{await call("delete",{collection:name,id});await load()}}}}}};
 async function load(){
   if(!code)return;
-  try{const j=await call("list");S.units=j.units||[];S.records=j.records||[];S.employees=j.employees||[];S.status="ready";$("#banner").innerHTML="";render();openPendingWO()}
+  try{const j=await call("list");S.units=j.units||[];S.records=j.records||[];S.employees=j.employees||[];S.checks=j.checks||[];S.status="ready";$("#banner").innerHTML="";render();openPendingWO()}
   catch(e){if(e.code!=="unauthorized")$("#banner").innerHTML=`<div class="banner">Can't reach the fleet log right now. Check your signal; it will try again.</div>`}
 }
 function askCode(wrong){
