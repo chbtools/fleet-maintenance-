@@ -206,6 +206,13 @@ td.r,th.r{text-align:right}
 .tab{white-space:nowrap}
 @media (max-width:520px){.brand h1{font-size:1.2rem}.brand small{font-size:.7rem}.log-btn{font-size:1rem;padding:8px 12px}.tab{font-size:1rem;padding:8px 7px}.tabs{gap:0}}
 .pwo table{table-layout:fixed}.pwo td{overflow-wrap:anywhere}
+.plist{display:flex;flex-direction:column;gap:8px}
+.prow{display:grid;grid-template-columns:58px 1fr 92px 34px;gap:6px;align-items:center;background:var(--sunk);border-radius:var(--r);padding:8px}
+.prow input{min-height:38px;padding:6px 8px}
+.prow .pdesc{grid-column:1/4}
+.prow .px{grid-row:1/3;grid-column:4;align-self:stretch;border:0;background:none;color:var(--muted);font-size:1.4rem;cursor:pointer;border-radius:var(--r)}
+.prow .px:hover{color:var(--bad);background:var(--bad-soft)}
+.phead{display:grid;grid-template-columns:58px 1fr 92px 34px;gap:6px;padding:0 8px;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 #printArea{display:none}
 @page{size:letter;margin:0}
 @media print{
@@ -234,7 +241,7 @@ td.r,th.r{text-align:right}
 
 <header class="band">
   <div class="band-in">
-    <div class="brand"><h1>Fleet Maintenance Log</h1><small>Repairs · Service · Cost</small></div>
+    <div class="brand"><h1>Fleet Maintenance Log</h1><small>Repairs · Service · Cost · v3.2</small></div>
     <button class="btn primary log-btn" id="logBtn" type="button">+ Work order</button>
   </div>
 </header>
@@ -315,6 +322,11 @@ const priRank=p=>({Urgent:0,High:1,Normal:2,Low:3})[p||"Normal"]??2;
 const initials=n=>String(n||"?").trim().split(/\s+/).map(w=>w[0]||"").slice(0,2).join("").toUpperCase()||"?";
 const woLink=r=>location.origin+location.pathname+"#wo-"+r.id;
 const phoneDigits=p=>String(p||"").replace(/[^\d+]/g,"");
+function partsOf(r){
+  try{const a=JSON.parse(r.partsList||"[]");if(Array.isArray(a)&&a.length)return a.map(x=>({qty:x.qty||"",no:x.no||"",desc:x.desc||"",cost:x.cost||""}))}catch(_){}
+  return String(r.parts||"").split(/[,;\n]+/).map(t=>t.trim()).filter(Boolean).map(t=>({qty:"",no:"",desc:t,cost:""}));
+}
+function partsText(list){return list.map(p=>[p.qty&&numv(p.qty)!==1?numv(p.qty)+" ×":"",p.no,p.desc].filter(Boolean).join(" ")).filter(Boolean).join(", ")}
 function sortedEmps(){return S.employees.slice().sort((a,b)=>String(a.name).localeCompare(String(b.name)))}
 function whoHtml(r){const n=empName(r);return n?`<span class="who"><span class="av">${h(initials(n))}</span>${h(n)}</span>`:`<span class="who none"><span class="av">?</span>Unassigned</span>`}
 function dueHtml(r){if(!r.dueDate)return"";if(r.status!=="open")return`<span class="due">Due ${fmtShort(r.dueDate)}</span>`;
@@ -751,7 +763,7 @@ function woDetail(id,opt={}){
   const ph=emp&&phoneDigits(emp.phone),em=emp&&emp.email;
   const dl=[["Unit",`${unitLabel(r.unitId)}${u&&u.name?" — "+u.name:""}`],["Type",r.kind],["Assigned to",name||"Unassigned"],["Requested by",r.requestedBy],["Source",r.source],["Reported again",r.checkLog],
     ["Opened",fmtDate(r.date)],["Due",r.dueDate?fmtDate(r.dueDate):""],["Meter",r.meter?numv(r.meter).toLocaleString()+" "+meterUnit(u):""],
-    ["Work performed",r.workDone],["Parts used",r.parts],["Labor hours",r.laborHours||""],["Vendor / tech",r.vendor],
+    ["Work performed",r.workDone],["Parts used",partsOf(r).map(p=>[p.qty?p.qty+" ×":"",p.no,p.desc,p.cost?"— "+money(numv(p.cost)):""].filter(Boolean).join(" ")).join("\n")],["Labor hours",r.laborHours||""],["Vendor / tech",r.vendor],
     ["Cost",total(r)?money(total(r)):""],["Completed",r.completedAt?fmtDate(String(r.completedAt).slice(0,10)):""]].filter(x=>x[1]);
   openSheet(`${wo(r)} · ${h(unitLabel(r.unitId))}`,`
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="stage ${st}">${h(stageLabel(r))}</span>${r.priority&&r.priority!=="Normal"?`<span class="pri ${h(r.priority)}">${h(r.priority)} priority</span>`:""}${dueHtml(r)}</div>
@@ -788,7 +800,7 @@ function woDetail(id,opt={}){
 
 function printWO(r){
   const u=unitById(r.unitId)||{};const e=h;
-  const partRows=String(r.parts||"").split(/[,;\n]+/).map(t=>t.trim()).filter(Boolean).slice(0,10);
+  const partRows=partsOf(r).slice(0,12);
   const blankRows=n=>Array.from({length:n},()=>`<tr><td>&nbsp;</td><td></td><td></td><td></td></tr>`).join("");
   $("#printArea").innerHTML=`<div class="pwo">
     <div class="hd"><div><h1>Work Order</h1><div>Fleet Maintenance Log</div></div><div class="won">${e(wo(r))}</div></div>
@@ -801,7 +813,7 @@ function printWO(r){
     </table>
     <h2>Problem / work requested</h2><div class="box">${e(r.description||"")}</div>
     <h2>Work performed</h2>${r.workDone?`<div class="box">${e(r.workDone)}</div>`:`<div class="lines">${"<div></div>".repeat(5)}</div>`}
-    <h2>Parts used</h2><table><tr><th style="width:10%">Qty</th><th style="width:22%">Part #</th><th>Description</th><th style="width:16%">Cost</th></tr>${partRows.map(t=>`<tr><td colspan="3">${e(t)}</td><td></td></tr>`).join("")}${blankRows(Math.max(2,5-partRows.length))}${numv(r.partsCost)?`<tr><td colspan="3" style="text-align:right;font-weight:bold">Parts total</td><td><b>${money(numv(r.partsCost))}</b></td></tr>`:""}</table>
+    <h2>Parts used</h2><table><tr><th style="width:10%">Qty</th><th style="width:22%">Part #</th><th>Description</th><th style="width:16%">Cost</th></tr>${partRows.map(p=>`<tr><td>${e(p.qty)}</td><td>${e(p.no)}</td><td>${e(p.desc)}</td><td>${String(p.cost).trim()?"$"+numv(p.cost).toFixed(2):""}</td></tr>`).join("")}${blankRows(Math.max(2,5-partRows.length))}${numv(r.partsCost)?`<tr><td colspan="3" style="text-align:right;font-weight:bold">Parts total</td><td><b>${money(numv(r.partsCost))}</b></td></tr>`:""}</table>
     <table><tr><th>Labor hours</th><td>${e(r.laborHours||"")}</td><th>Meter at finish</th><td>${e(r.meter||"")} ${e(meterUnit(u))}</td></tr></table>
     <div class="sig"><div>Technician signature &nbsp;/&nbsp; date</div><div>Supervisor sign-off &nbsp;/&nbsp; date</div></div>
     <div class="ft">Printed ${e(fmtDate(today()))} · ${e(woLink(r))}</div></div>`;
@@ -875,8 +887,11 @@ function workForm({recId,unitId,complete}={}){
     <div class="f"><label for="wDone">Work performed</label><textarea id="wDone" placeholder="e.g. Replaced hose on tilt cylinder, topped off hydraulic fluid, tested" ${dis}>${h(r.workDone||"")}</textarea></div>
     <div class="g2"><div class="f"><label for="wDate" id="wDateL">${st==="done"?"Date completed":"Date opened"}</label><input type="date" id="wDate" value="${h(date0)}" ${dis}></div>
       <div class="f"><label for="wMeter">Meter reading <span id="wMU"></span></label><input type="number" id="wMeter" inputmode="decimal" min="0" step="any" value="${h(r.meter||"")}" placeholder="e.g. 4210" ${dis}></div></div>
-    <div class="f"><label for="wParts">Parts used</label><input type="text" id="wParts" value="${h(r.parts||"")}" placeholder="Part numbers, qty" ${dis}></div>
-    <div class="g3"><div class="f"><label for="wPC">Parts $</label><input type="number" id="wPC" inputmode="decimal" min="0" step="0.01" value="${h(r.partsCost||"")}" placeholder="0" ${dis}></div>
+    <div class="f"><span class="lbl">Parts used</span>
+      <div class="phead" id="pHead"><span>Qty</span><span>Part #</span><span>Cost $</span><span></span></div>
+      <div class="plist" id="pList"></div>
+      ${ro?"":`<button class="btn small" id="pAdd" type="button" style="align-self:flex-start">+ Add part</button>`}</div>
+    <div class="g3"><div class="f"><label for="wPC">Parts $ <span class="hint" id="pcHint" style="text-transform:none;letter-spacing:0"></span></label><input type="number" id="wPC" inputmode="decimal" min="0" step="0.01" value="${h(r.partsCost||"")}" placeholder="0" ${dis}></div>
       <div class="f"><label for="wLC">Labor $</label><input type="number" id="wLC" inputmode="decimal" min="0" step="0.01" value="${h(r.laborCost||"")}" placeholder="0" ${dis}></div>
       <div class="f"><label for="wOC">Other $</label><input type="number" id="wOC" inputmode="decimal" min="0" step="0.01" value="${h(r.otherCost||"")}" placeholder="0" ${dis}></div></div>
     <div class="g2"><div class="f"><label for="wLH">Labor hours</label><input type="number" id="wLH" inputmode="decimal" min="0" step="0.25" value="${h(r.laborHours||"")}" placeholder="0" ${dis}></div>
@@ -887,7 +902,22 @@ function workForm({recId,unitId,complete}={}){
     `${ex?`<button class="btn danger small" id="wDel" type="button">Delete</button>`:""}<span class="sp"></span><button class="btn ghost" data-close type="button">Cancel</button><button class="btn primary" id="wSave" type="button">${ex?(complete?"Complete job":"Save changes"):"Save work order"}</button>`,
     sc=>{
       const upd=()=>{$("#wTot").textContent=money(numv($("#wPC").value)+numv($("#wLC").value)+numv($("#wOC").value));const u=unitById($("#wUnit").value);$("#wMU").textContent=u&&meterUnit(u)?`(${meterUnit(u)})`:""};
-      ["wPC","wLC","wOC"].forEach(i=>$("#"+i).oninput=upd);$("#wUnit").onchange=upd;upd();
+      let plist=partsOf(r);
+      const pSum=()=>{const has=plist.some(p=>String(p.cost).trim()!=="");const pc=$("#wPC");
+        if(has){pc.value=plist.reduce((a,p)=>a+numv(p.cost),0).toFixed(2);pc.readOnly=true;$("#pcHint").textContent="· from parts list"}
+        else{pc.readOnly=false;$("#pcHint").textContent=""}upd()};
+      const drawParts=()=>{const L=$("#pList");$("#pHead").hidden=!plist.length;
+        L.innerHTML=plist.map((p,i)=>`<div class="prow" data-i="${i}">
+          <input type="number" inputmode="decimal" min="0" step="any" aria-label="Quantity" data-k="qty" value="${h(p.qty)}" placeholder="1" ${dis}>
+          <input type="text" aria-label="Part number" data-k="no" value="${h(p.no)}" placeholder="Part #" autocapitalize="characters" ${dis}>
+          <input type="number" inputmode="decimal" min="0" step="0.01" aria-label="Cost" data-k="cost" value="${h(p.cost)}" placeholder="0.00" ${dis}>
+          ${ro?"":`<button class="px" type="button" aria-label="Remove part" data-x="${i}">×</button>`}
+          <input class="pdesc" type="text" aria-label="Description" data-k="desc" value="${h(p.desc)}" placeholder="Description, e.g. Oil filter" ${dis}></div>`).join("");
+        L.querySelectorAll("input").forEach(inp=>inp.oninput=()=>{plist[+inp.closest(".prow").dataset.i][inp.dataset.k]=inp.value;if(inp.dataset.k==="cost")pSum()});
+        L.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{plist.splice(+b.dataset.x,1);drawParts();pSum()});};
+      drawParts();
+      const pa=$("#pAdd");if(pa)pa.onclick=()=>{plist.push({qty:"",no:"",desc:"",cost:""});drawParts();const rows=$("#pList").querySelectorAll(".prow");rows[rows.length-1].querySelector("[data-k=no]").focus()};
+      ["wPC","wLC","wOC"].forEach(i=>$("#"+i).oninput=upd);$("#wUnit").onchange=upd;pSum();
       sc.querySelectorAll("#wKind button").forEach(b=>b.onclick=()=>{kind=b.dataset.k;sc.querySelectorAll("#wKind button").forEach(x=>x.setAttribute("aria-pressed",x===b))});
       sc.querySelectorAll("#wStat button").forEach(b=>b.onclick=()=>{st=b.dataset.s;sc.querySelectorAll("#wStat button").forEach(x=>x.setAttribute("aria-pressed",x===b));
         $("#wDateL").textContent=st==="done"?"Date completed":"Date opened";
@@ -906,7 +936,8 @@ function workForm({recId,unitId,complete}={}){
         const data={unitId,unitNumber:(unitById(unitId)||{}).unit||"",kind,date,status:done?"done":"open",stage:done?"done":st,
           description:desc,workDone:$("#wDone").value.trim(),priority:$("#wPri").value,
           assignedTo:who,assignedName:who?(empById(who)||{}).name||"":"",dueDate:$("#wDue").value||"",requestedBy:$("#wReq").value.trim(),
-          parts:$("#wParts").value.trim(),meter:numv($("#wMeter").value)||null,
+          parts:partsText(plist.filter(p=>p.desc.trim()||p.no.trim())),partsList:JSON.stringify(plist.filter(p=>p.desc.trim()||p.no.trim()).map(p=>({qty:String(p.qty).trim(),no:p.no.trim(),desc:p.desc.trim(),cost:String(p.cost).trim()}))),
+          meter:numv($("#wMeter").value)||null,
           partsCost:numv($("#wPC").value),laborCost:numv($("#wLC").value),otherCost:numv($("#wOC").value),laborHours:numv($("#wLH").value)||null,
           vendor:$("#wVen").value.trim(),completedAt:done?(ex&&ex.completedAt&&ex.status!=="open"?ex.completedAt:new Date().toISOString()):"",
           createdAt:ex?ex.createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
