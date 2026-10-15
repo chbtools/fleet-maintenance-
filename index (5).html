@@ -1,0 +1,1061 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#26303a">
+<title>Fleet Maintenance Log</title>
+<!-- SETUP: paste your Google Apps Script web app URL between the quotes -->
+<script>window.FLEET_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz1ACsu2pcRyi0FdRoTLzyYFb01gpqIkqeO5qpUSdieYDf_y77kTjZqCYhdteYaQ9esIg/exec";</script>
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="apple-touch-icon.png"><link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: steel header band over a concrete-grey shop floor; work-order rows, unit tags, tabbed sections. */
+:root{
+  --bg:#eeede9; --surface:#fbfaf7; --sunk:#e4e2dd; --ink:#1c1e21; --muted:#5f6268; --line:#d4d1cb;
+  --accent:#c2410c; --accent-ink:#ffffff; --accent-soft:#f6e1d6;
+  --steel:#26303a; --on-steel:#f2f0eb; --on-steel-muted:#a9b2bb;
+  --ok:#2c7a4b; --ok-soft:#dcefe2; --warn:#a86a12; --warn-soft:#f6ead2; --bad:#b42318; --bad-soft:#f7dcd8;
+  --display:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:6px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#131415; --surface:#1c1e20; --sunk:#25272a; --ink:#ecebe6; --muted:#9b9c98; --line:#32353a;
+  --accent:#f07a3e; --accent-ink:#1a0d06; --accent-soft:#3a2216;
+  --steel:#0d1013; --on-steel:#f2f0eb; --on-steel-muted:#8e98a2;
+  --ok:#55b77f; --ok-soft:#1b3326; --warn:#e2a740; --warn-soft:#3a2e15; --bad:#f2675d; --bad-soft:#3d1c19;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#131415; --surface:#1c1e20; --sunk:#25272a; --ink:#ecebe6; --muted:#9b9c98; --line:#32353a;
+  --accent:#f07a3e; --accent-ink:#1a0d06; --accent-soft:#3a2216;
+  --steel:#0d1013; --on-steel:#f2f0eb; --on-steel-muted:#8e98a2;
+  --ok:#55b77f; --ok-soft:#1b3326; --warn:#e2a740; --warn-soft:#3a2e15; --bad:#f2675d; --bad-soft:#3d1c19;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono);font-size:.86em}
+
+/* header */
+.band{background:var(--steel);color:var(--on-steel);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+.band-in{max-width:1080px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:12px}
+.brand{flex:1;min-width:0}
+.brand h1{font-family:var(--display);font-weight:700;font-size:1.6rem;letter-spacing:.02em;margin:0;line-height:1;text-transform:uppercase}
+.brand small{display:block;color:var(--on-steel-muted);font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;margin-top:3px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:var(--r);padding:9px 14px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:6px;min-height:40px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--bad);border-color:var(--bad)}
+.btn.small{min-height:32px;padding:5px 10px;font-size:.88rem}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.log-btn{font-family:var(--display);font-size:1.1rem;letter-spacing:.04em;text-transform:uppercase;padding:8px 16px}
+
+/* kpis */
+.wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:16px 48px}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
+.kpi{padding:12px 14px;border-left:1px solid var(--line);min-width:0}
+.kpi:first-child{border-left:0}
+.kpi .lab{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.kpi .val{font-family:var(--display);font-weight:600;font-size:1.75rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .val.bad{color:var(--bad)} .kpi .val.warn{color:var(--warn)}
+@media (max-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}.kpi{border-left:0;border-top:1px solid var(--line)}.kpi:nth-child(-n+2){border-top:0}.kpi:nth-child(even){border-left:1px solid var(--line)}.kpi:last-child{grid-column:1/-1}}
+
+/* tabs */
+.tabs{display:flex;gap:4px;margin:20px 0 14px;border-bottom:2px solid var(--line)}
+.tab{background:none;border:0;padding:8px 14px;font-family:var(--display);font-size:1.15rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.toolbar .grow{flex:1 1 180px;min-width:0}
+input[type=text],input[type=number],input[type=date],input[type=search],select,textarea{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:8px 10px;min-height:40px}
+textarea{min-height:76px;resize:vertical}
+.toolbar select{width:auto}
+
+/* fleet */
+.units{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.unit{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:8px;min-width:0}
+.unit:hover{border-color:var(--muted)}
+.unit-top{display:flex;align-items:flex-start;gap:10px}
+.tag{font-family:var(--display);font-weight:700;font-size:1.25rem;letter-spacing:.03em;background:var(--sunk);border:1px solid var(--line);border-radius:4px;padding:1px 8px;white-space:nowrap}
+.unit-name{flex:1;min-width:0;font-weight:500;line-height:1.3}
+.unit-name small{display:block;color:var(--muted);font-weight:400;font-size:.82rem}
+.unit-meta{display:flex;justify-content:space-between;gap:8px;font-size:.84rem;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px}
+.unit-meta b{color:var(--ink);font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:.74rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.pill.ok{color:var(--ok);background:var(--ok-soft)} .pill.warn{color:var(--warn);background:var(--warn-soft)} .pill.bad{color:var(--bad);background:var(--bad-soft)} .pill.idle{color:var(--muted);background:var(--sunk)}
+.pm{font-size:.82rem;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+
+/* work orders */
+.rows{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.row{display:grid;grid-template-columns:92px 1fr auto;gap:12px;padding:11px 14px;border-top:1px solid var(--line);cursor:pointer;align-items:start;width:100%;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left}
+.row:first-child{border-top:0}
+.row:hover{background:var(--sunk)}
+.row .d{font-size:.84rem;color:var(--muted)}
+.row .d b{display:block;color:var(--ink);font-weight:600}
+.row .w{min-width:0}
+.row .w .t{font-weight:500;overflow-wrap:anywhere}
+.row .w .s{font-size:.82rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:3px;align-items:center}
+.row .c{font-weight:600;text-align:right;white-space:nowrap}
+.kind{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:1px 6px;border-radius:3px;border:1px solid currentColor}
+.kind.Repair{color:var(--bad)} .kind.Service{color:var(--ok)} .kind.Inspection{color:var(--muted)}
+.open-flag{color:var(--warn);font-weight:600}
+@media (max-width:520px){.row{grid-template-columns:1fr auto}.row .d{grid-column:1/-1;display:flex;gap:8px}.row .d b{display:inline}}
+
+/* empty */
+.empty{border:2px dashed var(--line);border-radius:var(--r);padding:28px 20px;text-align:center;color:var(--muted)}
+.empty h3{font-family:var(--display);font-size:1.5rem;color:var(--ink);margin:0 0 6px;text-transform:uppercase;letter-spacing:.03em}
+.empty p{margin:0 auto 14px;max-width:46ch}
+
+/* reports */
+.rep-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:760px){.rep-grid{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;min-width:0}
+.panel h3{font-family:var(--display);font-size:1.15rem;text-transform:uppercase;letter-spacing:.05em;margin:0 0 10px;font-weight:600}
+.big{font-family:var(--display);font-size:2.6rem;font-weight:700;line-height:1}
+.split{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.split div{border-top:3px solid var(--line);padding-top:6px;font-size:.82rem;color:var(--muted)}
+.split div b{display:block;color:var(--ink);font-size:1rem}
+.split .r{border-color:var(--bad)} .split .s{border-color:var(--ok)} .split .i{border-color:var(--muted)}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+td.r,th.r{text-align:right}
+.bar{height:6px;background:var(--accent);border-radius:3px;min-width:2px}
+.chart svg{width:100%;height:auto;display:block}
+.share-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.note{font-size:.84rem;color:var(--muted)}
+
+/* sheet */
+.scrim{position:fixed;inset:0;background:rgba(10,12,14,.55);z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:max(24px,env(safe-area-inset-top,0px)) 16px 24px;overflow-y:auto}
+.sheet{background:var(--bg);border:1px solid var(--line);border-radius:10px;width:100%;max-width:620px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.sheet-h{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);background:var(--surface);border-radius:10px 10px 0 0}
+.sheet-h h2{flex:1;margin:0;font-family:var(--display);font-size:1.45rem;text-transform:uppercase;letter-spacing:.03em;text-wrap:balance}
+.x{background:none;border:0;font-size:1.6rem;line-height:1;cursor:pointer;color:var(--muted);padding:4px 8px}
+.sheet-b{padding:16px;display:flex;flex-direction:column;gap:12px}
+.sheet-f{padding:12px 16px;border-top:1px solid var(--line);display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sheet-f .sp{flex:1}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.f label,.lbl{font-size:.76rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.f .hint{font-size:.78rem;color:var(--muted)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:480px){.g3{grid-template-columns:1fr 1fr}}
+.seg{display:flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+.seg button{flex:1;border:0;background:none;padding:9px 6px;cursor:pointer;font-weight:500;border-left:1px solid var(--line);min-height:42px}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:600}
+.total-line{display:flex;justify-content:space-between;align-items:baseline;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px}
+.total-line b{font-family:var(--display);font-size:1.6rem}
+.err{color:var(--bad);font-size:.86rem}
+.dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:.9rem}
+.dl dt{color:var(--muted)} .dl dd{margin:0;overflow-wrap:anywhere;white-space:pre-line}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--steel);color:var(--on-steel);padding:10px 16px;border-radius:var(--r);z-index:60;font-size:.92rem;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.banner{background:var(--warn-soft);color:var(--ink);border:1px solid var(--warn);border-radius:var(--r);padding:10px 12px;margin-bottom:12px;font-size:.9rem}
+.copybox{width:100%;min-height:160px;font-family:var(--mono);font-size:.8rem}
+
+/* work orders */
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:99px;padding:6px 12px;min-height:36px;cursor:pointer;font-weight:500;font-size:.9rem;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.chip .n{font-variant-numeric:tabular-nums;opacity:.75}
+.me-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:-2px 0 14px;font-size:.88rem;color:var(--muted)}
+.me-row select{width:auto;min-height:36px;padding:4px 8px}
+.wo-group{margin-bottom:18px}
+.wo-group h3{font-family:var(--display);font-size:1.05rem;text-transform:uppercase;letter-spacing:.06em;margin:0 0 8px;font-weight:600;color:var(--muted);display:flex;gap:8px;align-items:baseline}
+.wo-group h3 b{color:var(--ink);font-variant-numeric:tabular-nums}
+.wos{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.wo{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:11px 13px;cursor:pointer;text-align:left;display:flex;flex-direction:column;gap:8px;min-width:0;width:100%}
+.wo:hover{border-color:var(--muted)}
+.wo[data-pri="Urgent"]{box-shadow:inset 4px 0 0 var(--bad)}
+.wo[data-pri="High"]{box-shadow:inset 4px 0 0 var(--warn)}
+.wo-top{display:flex;gap:8px;align-items:flex-start}
+.wo-top .tag{font-size:1rem}
+.wo-title{flex:1;min-width:0;font-weight:500;line-height:1.3;overflow-wrap:anywhere}
+.wo-meta{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;font-size:.82rem;color:var(--muted)}
+.who{display:inline-flex;align-items:center;gap:6px;color:var(--ink);font-weight:500}
+.av{width:22px;height:22px;border-radius:50%;background:var(--steel);color:var(--on-steel);font-size:.66rem;font-weight:700;display:inline-grid;place-items:center;letter-spacing:.02em}
+.who.none{color:var(--muted);font-weight:400}.who.none .av{background:var(--sunk);color:var(--muted)}
+.due.over{color:var(--bad);font-weight:600}
+.pri{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:3px;white-space:nowrap}
+.pri.Urgent{background:var(--bad-soft);color:var(--bad)}.pri.High{background:var(--warn-soft);color:var(--warn)}.pri.Normal{background:var(--sunk);color:var(--muted)}.pri.Low{background:var(--sunk);color:var(--muted)}
+.stage{font-size:.74rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.stage.open{background:var(--accent-soft);color:var(--accent)}.stage.in_progress{background:var(--ok-soft);color:var(--ok)}.stage.waiting{background:var(--warn-soft);color:var(--warn)}.stage.done{background:var(--sunk);color:var(--muted)}
+.wo-desc{font-size:1.05rem;line-height:1.45;margin:0;overflow-wrap:anywhere;white-space:pre-wrap}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.actions .btn{flex:1 1 auto;justify-content:center;text-decoration:none;color:inherit}
+.actions .btn.primary{color:var(--accent-ink)}
+.share-box{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:12px;display:flex;flex-direction:column;gap:10px}
+.share-box.notify{border-color:var(--accent);background:var(--accent-soft)}
+.section-lbl{font-family:var(--display);font-size:1rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px;margin-top:2px}
+.seg.wrap4 button{font-size:.88rem;padding:8px 4px}
+.team-row{display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.team-row:first-child{border-top:0}
+.team-row .nm{flex:1;min-width:0}
+.team-row .nm small{display:block;color:var(--muted);font-size:.8rem;overflow-wrap:anywhere}
+.tabs{overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{white-space:nowrap}
+@media (max-width:520px){.brand h1{font-size:1.2rem}.brand small{font-size:.7rem}.log-btn{font-size:1rem;padding:8px 12px}.tab{font-size:1rem;padding:8px 7px}.tabs{gap:0}}
+.pwo table{table-layout:fixed}.pwo td{overflow-wrap:anywhere}
+#printArea{display:none}
+@media print{
+  body>*:not(#printArea){display:none!important}
+  #printArea{display:block!important;color:#000;background:#fff;font-family:Arial,Helvetica,sans-serif;font-size:12pt}
+  :root{padding:0!important}
+  body{background:#fff!important}
+}
+.pwo h1{font-size:20pt;margin:0;letter-spacing:.02em;text-transform:uppercase}
+.pwo .hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #000;padding-bottom:6px;margin-bottom:10px}
+.pwo .won{font-size:22pt;font-weight:bold;font-family:"Courier New",monospace}
+.pwo table{width:100%;border-collapse:collapse;margin:6px 0 12px}
+.pwo td,.pwo th{border:1px solid #000;padding:6px 7px;text-align:left;vertical-align:top;font-size:11pt}
+.pwo th{background:#eee;font-size:9pt;text-transform:uppercase;letter-spacing:.04em;width:18%}
+.pwo h2{font-size:11pt;text-transform:uppercase;letter-spacing:.05em;margin:12px 0 4px}
+.pwo .box{border:1px solid #000;min-height:70px;padding:6px 7px;white-space:pre-wrap}
+.pwo .lines div{border-bottom:1px solid #000;height:26px}
+.pwo .sig{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:22px}
+.pwo .sig div{border-top:1px solid #000;padding-top:4px;font-size:9pt}
+.pwo .ft{margin-top:16px;font-size:8pt;color:#444}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+<style>[hidden]{display:none!important}body{margin:0}:root{padding-top:env(safe-area-inset-top,0px)}</style>
+</head>
+<body>
+
+<header class="band">
+  <div class="band-in">
+    <div class="brand"><h1>Fleet Maintenance Log</h1><small>Repairs · Service · Cost</small></div>
+    <button class="btn primary log-btn" id="logBtn" type="button">+ Work order</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="banner"></div>
+  <section class="kpis" id="kpis" aria-label="Fleet summary"></section>
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="fleet" id="tab-fleet">Fleet</button>
+    <button class="tab" role="tab" data-tab="orders" id="tab-orders">Work orders</button>
+    <button class="tab" role="tab" data-tab="history" id="tab-history">History</button>
+    <button class="tab" role="tab" data-tab="reports" id="tab-reports">Reports</button>
+  </nav>
+  <section id="view"></section>
+</main>
+<div id="sheetRoot"></div>
+<div id="toastRoot"></div>
+<div id="printArea"></div>
+
+<script>
+(function(){
+const TYPES=["Forklift","Air compressor","Truck","Trailer","Loader / skid steer","Generator","Crane / hoist","Mower","Other"];
+const KINDS=["Repair","Service","Inspection"];
+const S={units:[],records:[],employees:[],checks:[],me:"",pendingWO:null,wo:{view:"open"},tab:"fleet",canWrite:true,db:null,dl:null,loaded:{u:false,r:false},status:"loading",
+  hist:{q:"",unit:"all",kind:"all"},rep:{range:"ytd",unit:"all",from:"",to:""}};
+
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const h=v=>String(v==null?"":v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money=n=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:n%1?2:0,minimumFractionDigits:n%1?2:0}).format(n||0);
+const money0=n=>new Intl.NumberFormat("en-US",{style:"currency",currency:"USD",maximumFractionDigits:0}).format(n||0);
+const numv=v=>{const n=parseFloat(String(v||"").replace(/[$,]/g,""));return isFinite(n)?n:0};
+const pad=n=>String(n).padStart(2,"0");
+const iso=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+const today=()=>iso(new Date());
+const fmtDate=s=>{if(!s)return"";const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})};
+const fmtShort=s=>{if(!s)return"";const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d).toLocaleDateString("en-US",{month:"short",day:"numeric"})};
+const daysBetween=(a,b)=>{const p=s=>{const[y,m,d]=s.split("-").map(Number);return Date.UTC(y,m-1,d)};return Math.round((p(b)-p(a))/864e5)};
+const total=r=>numv(r.partsCost)+numv(r.laborCost)+numv(r.otherCost);
+const wo=r=>"WO-"+String(r.id||"").replace(/[^a-z0-9]/gi,"").slice(-5).toUpperCase();
+const unitById=id=>S.units.find(u=>u.id===id);
+const unitLabel=id=>{const u=unitById(id);if(u)return u.unit;if(String(id||"").startsWith("?"))return String(id).slice(1)+" (not in fleet)";return"(removed)"};
+const checksFor=id=>S.checks.filter(c=>c.unitId===id).sort((a,b)=>String(b.at||b.date).localeCompare(String(a.at||a.date)));
+const fmtTime=s=>{const d=new Date(s);return isNaN(d)?"":d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})};
+const meterUnit=u=>u&&u.meterType==="Miles"?"mi":u&&u.meterType==="Hours"?"hrs":"";
+function toast(msg){$("#toastRoot").innerHTML="";const t=document.createElement("div");t.className="toast";t.textContent=msg;$("#toastRoot").appendChild(t);setTimeout(()=>t.remove(),2600)}
+function sortedUnits(){return S.units.slice().sort((a,b)=>String(a.unit).localeCompare(String(b.unit),undefined,{numeric:true}))}
+function recsFor(id){return S.records.filter(r=>r.unitId===id)}
+function curMeter(u){let m=numv(u.meter);for(const r of recsFor(u.id))if(numv(r.meter)>m)m=numv(r.meter);return m}
+
+/* PM status from last Service record */
+function pmStatus(u){
+  const hrs=numv(u.pmMeter),days=numv(u.pmDays);
+  if(!hrs&&!days)return null;
+  const svc=recsFor(u.id).filter(r=>r.kind==="Service"&&r.status!=="open").sort((a,b)=>b.date.localeCompare(a.date))[0];
+  if(!svc)return{level:"warn",text:"No PM logged yet"};
+  let level="ok",parts=[];
+  if(hrs){const since=curMeter(u)-numv(svc.meter);const left=hrs-since;
+    if(numv(svc.meter)||curMeter(u)){if(left<=0){level="bad";parts.push(Math.abs(Math.round(left))+" "+meterUnit(u)+" over")}
+      else{if(left<=hrs*.1&&level!=="bad")level="warn";parts.push(Math.round(left)+" "+meterUnit(u)+" left")}}}
+  if(days){const left=days-daysBetween(svc.date,today());
+    if(left<=0){level="bad";parts.push(Math.abs(left)+" days over")}
+    else{if(left<=Math.max(7,days*.1)&&level!=="bad")level="warn";parts.push(left+" days left")}}
+  return{level,text:(level==="bad"?"PM overdue · ":level==="warn"?"PM due soon · ":"PM ok · ")+parts.join(", ")};
+}
+const statusPill=s=>{s=s||"Running";const c=s==="Running"?"ok":s==="Down"?"bad":"idle";return`<span class="pill ${c}">${h(s)}</span>`};
+
+
+/* ---------- Work order helpers ---------- */
+const PRIS=["Low","Normal","High","Urgent"];
+const STAGES=[["open","Open"],["in_progress","In progress"],["waiting","Waiting on parts"]];
+const stageOf=r=>r.status==="open"?(r.stage&&r.stage!=="done"?r.stage:"open"):"done";
+const stageLabel=r=>({open:"Open",in_progress:"In progress",waiting:"Waiting on parts",done:"Completed"})[stageOf(r)]||"Open";
+const empById=id=>S.employees.find(e=>e.id===id);
+const empName=r=>{const e=r.assignedTo&&empById(r.assignedTo);return e?e.name:(r.assignedTo?(r.assignedName||""):"")};
+const isOverdue=r=>r.status==="open"&&!!r.dueDate&&r.dueDate<today();
+const priRank=p=>({Urgent:0,High:1,Normal:2,Low:3})[p||"Normal"]??2;
+const initials=n=>String(n||"?").trim().split(/\s+/).map(w=>w[0]||"").slice(0,2).join("").toUpperCase()||"?";
+const woLink=r=>location.origin+location.pathname+"#wo-"+r.id;
+const phoneDigits=p=>String(p||"").replace(/[^\d+]/g,"");
+function sortedEmps(){return S.employees.slice().sort((a,b)=>String(a.name).localeCompare(String(b.name)))}
+function whoHtml(r){const n=empName(r);return n?`<span class="who"><span class="av">${h(initials(n))}</span>${h(n)}</span>`:`<span class="who none"><span class="av">?</span>Unassigned</span>`}
+function dueHtml(r){if(!r.dueDate)return"";if(r.status!=="open")return`<span class="due">Due ${fmtShort(r.dueDate)}</span>`;
+  const d=daysBetween(today(),r.dueDate);
+  if(d<0)return`<span class="due over">Overdue ${-d} day${d===-1?"":"s"}</span>`;
+  return`<span class="due">${d===0?"Due today":d===1?"Due tomorrow":"Due "+fmtShort(r.dueDate)}</span>`}
+function woMessage(r){
+  const u=unitById(r.unitId),n=empName(r);
+  return[`Work order ${wo(r)}${r.priority&&r.priority!=="Normal"?` (${r.priority.toUpperCase()} priority)`:""}`,
+    `Unit: ${unitLabel(r.unitId)}${u&&u.name?" "+u.name:""}`,
+    `${r.kind||"Repair"}: ${r.description||""}`,
+    n?`Assigned to: ${n}`:"",r.dueDate?`Due: ${fmtDate(r.dueDate)}`:"",
+    `Open it: ${woLink(r)}`].filter(Boolean).join("\n");
+}
+
+/* ---------- KPIs ---------- */
+function renderKpis(){
+  const t=today(),y=t.slice(0,4),m=t.slice(0,7);
+  let ytd=0,mo=0;for(const r of S.records){if(r.date&&r.date.startsWith(y))ytd+=total(r);if(r.date&&r.date.startsWith(m))mo+=total(r)}
+  const down=S.units.filter(u=>u.status==="Down").length;
+  const pmDue=S.units.filter(u=>{const p=pmStatus(u);return p&&p.level!=="ok"}).length;
+  const open=S.records.filter(r=>r.status==="open").length,late=S.records.filter(isOverdue).length;
+  $("#kpis").innerHTML=[
+    ["Units",S.units.length,""],["Down",down,down?"bad":""],["PM due / overdue",pmDue,pmDue?"warn":""],
+    ["Open work orders",late?`${open} · ${late} late`:open,late?"bad":open?"warn":""],["Spent this month · YTD",`${money0(mo)} · ${money0(ytd)}`,""]
+  ].map(([l,v,c])=>`<div class="kpi"><div class="lab">${l}</div><div class="val ${c}">${h(v)}</div></div>`).join("");
+}
+
+/* ---------- Fleet ---------- */
+function renderFleet(){
+  const v=$("#view");
+  if(S.status==="loading"&&!S.units.length){v.innerHTML=`<div class="empty"><p>Loading fleet…</p></div>`;return}
+  if(!S.units.length){
+    v.innerHTML=`<div class="empty"><h3>No equipment yet</h3><p>Add each forklift, compressor, truck or machine once. Then log repairs and service against it in a few taps.</p>${S.canWrite?`<button class="btn primary" id="addFirst" type="button">+ Add first unit</button>`:""}</div>`;
+    const b=$("#addFirst");if(b)b.onclick=()=>unitForm();return}
+  const t=today(),y=t.slice(0,4);
+  v.innerHTML=`<div class="toolbar"><div class="grow note">${S.units.length} unit${S.units.length>1?"s":""} · tap a unit for its full history</div><button class="btn" id="xlFleet" type="button">Excel</button>${S.canWrite?`<button class="btn" id="addUnit" type="button">+ Add unit</button>`:""}</div>
+  <div class="units">${sortedUnits().map(u=>{
+    const rs=recsFor(u.id).sort((a,b)=>b.date.localeCompare(a.date));const last=rs[0];
+    const ytd=rs.filter(r=>r.date.startsWith(y)).reduce((s,r)=>s+total(r),0);
+    const pm=pmStatus(u);const m=curMeter(u);
+    return`<button class="unit" type="button" data-unit="${h(u.id)}">
+      <div class="unit-top"><span class="tag">${h(u.unit)}</span><div class="unit-name">${h(u.name||u.type||"")}<small>${h([u.make,u.model,u.year].filter(Boolean).join(" "))}</small></div>${statusPill(u.status)}</div>
+      ${pm?`<div class="pm"><span class="pill ${pm.level}">${pm.level==="ok"?"PM":"PM"}</span><span>${h(pm.text.replace(/^PM [a-z ]+· /,""))}</span></div>`:""}
+      ${(()=>{const cs=checksFor(u.id);if(!cs.length)return"";const c=cs[0],td=c.date===t;
+        return`<div class="pm"><span class="pill ${!td?"warn":c.result==="Pass"?"ok":"bad"}">Daily check</span><span>${td?`${h(c.result)} · ${h(fmtTime(c.at))}${c.driver?" · "+h(c.driver):""}`:`None today · last ${h(fmtShort(c.date))}`}</span></div>`})()}
+      <div class="unit-meta num"><span>${m?`<b>${m.toLocaleString()}</b> ${meterUnit(u)}`:"No meter"}</span><span>Last: <b>${last?fmtShort(last.date):"—"}</b></span><span>YTD <b>${money0(ytd)}</b></span></div>
+    </button>`}).join("")}</div>`;
+  const a=$("#addUnit");if(a)a.onclick=()=>unitForm();
+  $("#xlFleet").onclick=e=>exportExcel(e.currentTarget);
+  v.querySelectorAll("[data-unit]").forEach(b=>b.onclick=()=>unitDetail(b.dataset.unit));
+}
+
+/* ---------- Work rows ---------- */
+function rowsHtml(list,showUnit=true){
+  if(!list.length)return`<div class="empty"><p>No work logged here yet.</p></div>`;
+  return`<div class="rows">${list.map(r=>`<button class="row" type="button" data-rec="${h(r.id)}">
+    <div class="d num"><b>${fmtShort(r.date)}</b>${r.date?r.date.slice(0,4):""}</div>
+    <div class="w"><div class="t">${showUnit?`<span class="tag" style="font-size:.95rem;margin-right:6px">${h(unitLabel(r.unitId))}</span>`:""}${h(r.description||"(no description)")}</div>
+      <div class="s"><span class="kind ${h(r.kind)}">${h(r.kind)}</span>${r.status==="open"?`<span class="open-flag">${h(stageLabel(r))}</span>`:""}${empName(r)?`<span>${h(empName(r))}</span>`:""}<span class="mono">${wo(r)}</span>${r.meter?`<span class="num">@ ${numv(r.meter).toLocaleString()} ${meterUnit(unitById(r.unitId))}</span>`:""}${r.vendor?`<span>${h(r.vendor)}</span>`:""}</div></div>
+    <div class="c num">${money(total(r))}</div></button>`).join("")}</div>`;
+}
+function bindRows(root){root.querySelectorAll("[data-rec]").forEach(b=>b.onclick=()=>woDetail(b.dataset.rec))}
+
+/* ---------- History ---------- */
+function renderHistory(){
+  const v=$("#view"),f=S.hist;
+  const q=f.q.toLowerCase();
+  const list=S.records.filter(r=>(f.unit==="all"||r.unitId===f.unit)&&(f.kind==="all"||(f.kind==="open"?r.status==="open":r.kind===f.kind))&&
+    (!q||[r.description,r.workDone,r.parts,r.vendor,unitLabel(r.unitId),wo(r),empName(r)].join(" ").toLowerCase().includes(q))).sort((a,b)=>b.date.localeCompare(a.date)||String(b.createdAt).localeCompare(String(a.createdAt)));
+  const sum=list.reduce((s,r)=>s+total(r),0);
+  v.innerHTML=`<div class="toolbar">
+    <input class="grow" type="search" id="hq" placeholder="Search work, parts, person, WO#" value="${h(f.q)}" aria-label="Search work history">
+    <select id="hu" aria-label="Unit"><option value="all">All units</option>${sortedUnits().map(u=>`<option value="${h(u.id)}" ${f.unit===u.id?"selected":""}>${h(u.unit)}</option>`).join("")}</select>
+    <select id="hk" aria-label="Type"><option value="all">All types</option>${KINDS.map(k=>`<option ${f.kind===k?"selected":""}>${k}</option>`).join("")}<option value="open" ${f.kind==="open"?"selected":""}>Open jobs</option></select>
+  </div><p class="note num" style="margin:0 0 10px">${list.length} job${list.length===1?"":"s"} · ${money(sum)}</p>${rowsHtml(list)}`;
+  const hq=$("#hq");let t;hq.oninput=()=>{clearTimeout(t);t=setTimeout(()=>{f.q=hq.value;renderHistory();const n=$("#hq");n.focus();n.setSelectionRange(n.value.length,n.value.length)},250)};
+  $("#hu").onchange=e=>{f.unit=e.target.value;renderHistory()};
+  $("#hk").onchange=e=>{f.kind=e.target.value;renderHistory()};
+  bindRows(v);
+}
+
+/* ---------- Reports ---------- */
+function rangeDates(){
+  const r=S.rep,d=new Date(),t=today(),y=d.getFullYear(),m=d.getMonth();
+  switch(r.range){
+    case"month":return[iso(new Date(y,m,1)),t,"This month"];
+    case"lastmonth":return[iso(new Date(y,m-1,1)),iso(new Date(y,m,0)),"Last month"];
+    case"quarter":{const q=Math.floor(m/3)*3;return[iso(new Date(y,q,1)),t,"This quarter"]}
+    case"ytd":return[y+"-01-01",t,"Year to date"];
+    case"lastyear":return[(y-1)+"-01-01",(y-1)+"-12-31",String(y-1)];
+    case"12m":return[iso(new Date(y,m-11,1)),t,"Last 12 months"];
+    case"all":return["0000-01-01","9999-12-31","All time"];
+    case"custom":return[r.from||"0000-01-01",r.to||"9999-12-31","Custom"];
+  }
+}
+function reportData(){
+  const[from,to,label]=rangeDates();const r=S.rep;
+  const list=S.records.filter(x=>x.date>=from&&x.date<=to&&(r.unit==="all"||x.unitId===r.unit)).sort((a,b)=>a.date.localeCompare(b.date));
+  const by={Repair:[0,0],Service:[0,0],Inspection:[0,0]};let parts=0,labor=0,other=0,hrs=0;
+  const perUnit={};const perMonth={};
+  for(const x of list){const t=total(x);(by[x.kind]||(by[x.kind]=[0,0]));by[x.kind][0]+=t;by[x.kind][1]++;
+    parts+=numv(x.partsCost);labor+=numv(x.laborCost);other+=numv(x.otherCost);hrs+=numv(x.laborHours);
+    const pu=perUnit[x.unitId]||(perUnit[x.unitId]={t:0,n:0,r:0,s:0});pu.t+=t;pu.n++;if(x.kind==="Repair")pu.r+=t;else pu.s+=t;
+    const mk=x.date.slice(0,7);perMonth[mk]=(perMonth[mk]||0)+t}
+  const sum=parts+labor+other;
+  const unitRows=Object.entries(perUnit).map(([id,v])=>({id,...v})).sort((a,b)=>b.t-a.t);
+  // month axis
+  let months=[];
+  if(list.length){let a=(from<"1000"?list[0].date:from).slice(0,7),b=(to>"9000"?list[list.length-1].date:to).slice(0,7);
+    let[yy,mm]=a.split("-").map(Number);let guard=0;while(guard++<60){const k=yy+"-"+pad(mm);months.push(k);if(k>=b)break;mm++;if(mm>12){mm=1;yy++}}
+    if(months.length>24)months=months.slice(-24)}
+  return{from,to,label,list,by,parts,labor,other,hrs,sum,unitRows,months,perMonth};
+}
+function chartSvg(D){
+  if(D.months.length<2)return"";
+  const W=640,H=210,L=52,R=8,T=12,B=28,vals=D.months.map(k=>D.perMonth[k]||0);
+  const max=Math.max(...vals,1);const step=niceStep(max/4);const top=Math.ceil(max/step)*step;
+  const bw=(W-L-R)/vals.length;const y=v=>T+(H-T-B)*(1-v/top);
+  let g="";for(let v=0;v<=top+1e-9;v+=step){g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)" font-family="IBM Plex Sans,sans-serif">${v>=1000?"$"+(v/1000)+"k":"$"+v}</text>`}
+  const every=Math.ceil(vals.length/8);
+  const bars=vals.map((v,i)=>{const x=L+i*bw+bw*.18,w=bw*.64;const[yy,mm]=D.months[i].split("-");
+    const lab=i%every===0?`<text x="${x+w/2}" y="${H-10}" text-anchor="middle" font-size="11" fill="var(--muted)" font-family="IBM Plex Sans,sans-serif">${new Date(+yy,+mm-1,1).toLocaleDateString("en-US",{month:"short"})}${mm==="01"||i===0?" ’"+yy.slice(2):""}</text>`:"";
+    return`<rect x="${x}" y="${y(v)}" width="${w}" height="${Math.max(0,y(0)-y(v))}" fill="var(--accent)" rx="2"><title>${D.months[i]}: ${money(v)}</title></rect>${lab}`}).join("");
+  return`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Monthly maintenance cost">${g}${bars}</svg>`;
+}
+function niceStep(x){const p=Math.pow(10,Math.floor(Math.log10(x||1)));const f=x/p;return(f<=1?1:f<=2?2:f<=5?5:10)*p}
+function renderReports(){
+  const v=$("#view"),r=S.rep,D=reportData();
+  const max=D.unitRows[0]?D.unitRows[0].t:1;
+  v.innerHTML=`<div class="toolbar">
+    <select id="rr" aria-label="Date range">${[["month","This month"],["lastmonth","Last month"],["quarter","This quarter"],["ytd","Year to date"],["12m","Last 12 months"],["lastyear","Last year"],["all","All time"],["custom","Custom dates…"]].map(([k,l])=>`<option value="${k}" ${r.range===k?"selected":""}>${l}</option>`).join("")}</select>
+    ${r.range==="custom"?`<input type="date" id="rf" value="${h(r.from)}" aria-label="From" style="width:auto"><input type="date" id="rt" value="${h(r.to)}" aria-label="To" style="width:auto">`:""}
+    <select id="ru" aria-label="Unit"><option value="all">All units</option>${sortedUnits().map(u=>`<option value="${h(u.id)}" ${r.unit===u.id?"selected":""}>${h(u.unit)} ${h(u.name||"")}</option>`).join("")}</select>
+  </div>
+  <div class="rep-grid">
+    <div class="panel"><h3>Total cost · ${h(D.label)}</h3>
+      <div class="big num">${money(D.sum)}</div>
+      <div class="note num">${D.list.length} job${D.list.length===1?"":"s"} · parts ${money0(D.parts)} · labor ${money0(D.labor)}${D.hrs?` (${D.hrs} hrs)`:""} · other ${money0(D.other)}</div>
+      <div class="split num"><div class="r">Repairs<b>${money0(D.by.Repair[0])}</b>${D.by.Repair[1]} jobs</div><div class="s">Service<b>${money0(D.by.Service[0])}</b>${D.by.Service[1]} jobs</div><div class="i">Inspections<b>${money0(D.by.Inspection[0])}</b>${D.by.Inspection[1]} jobs</div></div>
+      <div class="share-row">
+        <button class="btn primary small" id="copyRep" type="button">Copy summary</button>
+        <button class="btn small" id="dlXlsx" type="button">Excel (all data)</button>
+        <button class="btn small" id="dlCsv" type="button" ${D.list.length?"":"disabled"}>Download CSV</button>
+        <button class="btn small" id="dlHtml" type="button" ${D.list.length?"":"disabled"}>Download report</button>
+      </div>
+      <p class="note" style="margin:10px 0 0">Everyone with this page's link and the shop code sees the same live records.</p>
+    </div>
+    <div class="panel chart"><h3>Cost by month</h3>${chartSvg(D)||`<p class="note">Log work across two or more months to see the trend.</p>`}</div>
+  </div>
+  <div class="panel" style="margin-top:12px"><h3>Cost by unit</h3>
+    ${D.unitRows.length?`<div class="tbl-wrap"><table class="num"><thead><tr><th>Unit</th><th>Equipment</th><th class="r">Jobs</th><th class="r">Repairs</th><th class="r">Service/Insp.</th><th class="r">Total</th><th style="width:22%"></th></tr></thead><tbody>
+    ${D.unitRows.map(x=>{const u=unitById(x.id);return`<tr><td><b>${h(unitLabel(x.id))}</b></td><td>${h(u?u.name||u.type||"":"")}</td><td class="r">${x.n}</td><td class="r">${money0(x.r)}</td><td class="r">${money0(x.s)}</td><td class="r"><b>${money(x.t)}</b></td><td><div class="bar" style="width:${(x.t/max*100).toFixed(1)}%"></div></td></tr>`}).join("")}
+    </tbody></table></div>`:`<p class="note">No work logged in this range.</p>`}
+  </div>
+  <h3 style="font-family:var(--display);text-transform:uppercase;letter-spacing:.05em;margin:18px 0 8px">Jobs in this report</h3>
+  ${rowsHtml(D.list.slice().reverse())}`;
+  $("#rr").onchange=e=>{r.range=e.target.value;if(r.range==="custom"&&!r.from){r.from=today().slice(0,4)+"-01-01";r.to=today()}renderReports()};
+  $("#ru").onchange=e=>{r.unit=e.target.value;renderReports()};
+  if($("#rf")){$("#rf").onchange=e=>{r.from=e.target.value;renderReports()};$("#rt").onchange=e=>{r.to=e.target.value;renderReports()}}
+  $("#copyRep").onclick=()=>copyText(summaryText(D));
+  $("#dlXlsx").onclick=e=>exportExcel(e.currentTarget);
+  $("#dlCsv").onclick=()=>save(`fleet-maintenance-${slug(D)}.csv`,csv(D));
+  $("#dlHtml").onclick=()=>save(`fleet-maintenance-report-${slug(D)}.html`,reportHtml(D));
+  bindRows(v);
+}
+const slug=D=>(D.from<"1000"?"all":D.from)+(D.to>"9000"?"":"_to_"+D.to)+(S.rep.unit!=="all"?"_"+unitLabel(S.rep.unit).replace(/\W+/g,""):"");
+const rangeText=D=>D.from<"1000"&&D.to>"9000"?"All time":`${fmtDate(D.from<"1000"?(D.list[0]||{}).date:D.from)} – ${fmtDate(D.to>"9000"?today():D.to)}`;
+function summaryText(D){
+  const L=[`FLEET MAINTENANCE REPORT — ${D.label}`,rangeText(D),S.rep.unit==="all"?"All units":`Unit ${unitLabel(S.rep.unit)}`,"",
+    `Total cost: ${money(D.sum)} (${D.list.length} jobs)`,
+    `Repairs: ${money(D.by.Repair[0])} (${D.by.Repair[1]}) | Service: ${money(D.by.Service[0])} (${D.by.Service[1]}) | Inspections: ${money(D.by.Inspection[0])} (${D.by.Inspection[1]})`,
+    `Parts ${money(D.parts)} · Labor ${money(D.labor)} · Other ${money(D.other)}`];
+  if(D.unitRows.length){L.push("","COST BY UNIT");for(const x of D.unitRows){const u=unitById(x.id);L.push(`${unitLabel(x.id)}${u&&u.name?" "+u.name:""} — ${money(x.t)} (${x.n} jobs)`)}}
+  const open=D.list.filter(x=>x.status==="open");
+  if(open.length){L.push("","OPEN WORK ORDERS");for(const x of open)L.push(`${wo(x)} ${unitLabel(x.unitId)}: ${x.description} — ${stageLabel(x)}${empName(x)?", "+empName(x):""}`)}
+  return L.join("\n");
+}
+function csv(D){
+  const q=v=>{v=String(v==null?"":v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
+  const rows=[["Date","WO","Unit","Equipment","Type","Status","Problem / work","Parts used","Meter","Labor hrs","Parts $","Labor $","Other $","Total $","Vendor / tech","Assigned to","Priority","Due","Requested by","Work performed"]];
+  for(const x of D.list){const u=unitById(x.unitId);rows.push([x.date,wo(x),unitLabel(x.unitId),u?u.name||"":"",x.kind,stageLabel(x),x.description,x.parts,x.meter,x.laborHours,numv(x.partsCost).toFixed(2),numv(x.laborCost).toFixed(2),numv(x.otherCost).toFixed(2),total(x).toFixed(2),x.vendor,empName(x),x.priority||"",x.dueDate||"",x.requestedBy||"",x.workDone||""])}
+  return rows.map(r=>r.map(q).join(",")).join("\r\n");
+}
+function reportHtml(D){
+  const css="body{font-family:Arial,sans-serif;color:#1c1e21;max-width:900px;margin:24px auto;padding:0 16px;font-size:13px}h1{font-size:22px;margin:0 0 4px;text-transform:uppercase;letter-spacing:.03em}h2{font-size:14px;text-transform:uppercase;letter-spacing:.05em;margin:22px 0 6px;border-bottom:2px solid #c2410c;padding-bottom:4px}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #ddd;padding:5px 6px;text-align:left;vertical-align:top}th{font-size:11px;text-transform:uppercase;color:#555}.r{text-align:right}.big{font-size:28px;font-weight:bold}.m{color:#555}";
+  const e=h;
+  return`<!doctype html><html><head><meta charset="utf-8"><title>Fleet Maintenance Report</title><style>${css}</style></head><body>
+  <h1>Fleet Maintenance Report</h1><div class="m">${e(D.label)} · ${e(rangeText(D))} · ${S.rep.unit==="all"?"All units":"Unit "+e(unitLabel(S.rep.unit))} · Generated ${e(fmtDate(today()))}</div>
+  <h2>Summary</h2><div class="big">${money(D.sum)}</div><div>${D.list.length} jobs · Parts ${money(D.parts)} · Labor ${money(D.labor)} · Other ${money(D.other)}</div>
+  <table style="margin-top:8px"><tr><th>Type</th><th class="r">Jobs</th><th class="r">Cost</th></tr>${KINDS.map(k=>`<tr><td>${k}</td><td class="r">${D.by[k][1]}</td><td class="r">${money(D.by[k][0])}</td></tr>`).join("")}</table>
+  <h2>Cost by unit</h2><table><tr><th>Unit</th><th>Equipment</th><th class="r">Jobs</th><th class="r">Total</th></tr>${D.unitRows.map(x=>{const u=unitById(x.id);return`<tr><td>${e(unitLabel(x.id))}</td><td>${e(u?u.name||"":"")}</td><td class="r">${x.n}</td><td class="r">${money(x.t)}</td></tr>`}).join("")}</table>
+  <h2>Work detail</h2><table><tr><th>Date</th><th>Unit</th><th>Type</th><th>Work done</th><th>Vendor / tech</th><th class="r">Total</th></tr>${D.list.map(x=>`<tr><td>${e(x.date)}</td><td>${e(unitLabel(x.unitId))}</td><td>${e(x.kind)}${x.status==="open"?" ("+e(stageLabel(x).toLowerCase())+")":""}${empName(x)?`<div class="m">${e(empName(x))}</div>`:""}</td><td>${e(x.description)}${x.parts?`<div class="m">Parts: ${e(x.parts)}</div>`:""}</td><td>${e(x.vendor)}</td><td class="r">${money(total(x))}</td></tr>`).join("")}</table>
+  </body></html>`;
+}
+async function save(filename,data){
+  if(!S.dl){toast("Downloads aren't available in this view");return}
+  try{await S.dl.save({filename,data});toast("Saved "+filename)}catch(e){if(e&&e.code==="declined")return;toast(e&&e.code==="rate_limited"?"A save prompt is already open":"Couldn't save the file here")}
+}
+async function copyText(text){
+  try{await navigator.clipboard.writeText(text);toast("Report summary copied")}
+  catch(_){openSheet("Copy report summary",`<p class="note" style="margin:0">Select all and copy, then paste into an email or text.</p><textarea class="copybox" id="cb" readonly>${h(text)}</textarea>`,`<span class="sp"></span><button class="btn" data-close type="button">Done</button>`,()=>{const c=$("#cb");c.focus();c.select()})}
+}
+
+/* Builds a plain description of the Excel workbook (sheets, cells, formulas, formats).
+   Shared by the browser writer (ExcelJS) and the offline test. */
+function fleetWorkbookSpec(units, records, todayIso, helpers) {
+  const { total, wo, pmText, meterUnit } = helpers;
+  const MONEY = '"$"#,##0.00', MONEY0 = '"$"#,##0', DATE = 'mm/dd/yyyy', MONTH = 'mmm yyyy', INT = '#,##0';
+  const colL = n => { let s = ''; n++; while (n) { const m = (n - 1) % 26; s = String.fromCharCode(65 + m) + s; n = Math.floor((n - 1) / 26); } return s; };
+  const byId = {}; units.forEach(u => byId[u.id] = u);
+  const label = r => (byId[r.unitId] && byId[r.unitId].unit) || r.unitNumber || '(removed)';
+  const num = v => { const n = parseFloat(v); return isFinite(n) ? n : null; };
+
+  /* ---- Work Log ---- */
+  const recs = records.slice().sort((a, b) => (a.date || '').localeCompare(b.date || '') || String(a.createdAt).localeCompare(String(b.createdAt)));
+  const stLabel = helpers.stageLabel || (x => x.status === 'open' ? 'Open' : 'Completed');
+  const who = helpers.empName || (x => x.assignedName || '');
+  const wlHead = ['Date', 'WO #', 'Unit', 'Equipment', 'Type', 'Status', 'Problem / work', 'Parts used', 'Meter', 'Labor hrs', 'Parts $', 'Labor $', 'Other $', 'Total $', 'Vendor / tech', 'Assigned to', 'Priority', 'Due', 'Requested by', 'Work performed'];
+  const wl = { name: 'Work Log', cols: [12, 10, 10, 26, 11, 15, 48, 30, 10, 9, 12, 12, 12, 13, 22, 18, 10, 12, 18, 44], cells: [], freeze: { row: 1, col: 0 } };
+  wlHead.forEach((h, c) => wl.cells.push({ r: 0, c, v: h, head: true }));
+  recs.forEach((x, i) => {
+    const r = i + 1, u = byId[x.unitId];
+    const row = [
+      { date: x.date, fmt: DATE }, { v: wo(x) }, { v: label(x) }, { v: u ? (u.name || u.type || '') : '' },
+      { v: x.kind || '' }, { v: stLabel(x), tone: x.status === 'open' ? 'warn' : null }, { v: x.description || '', wrap: true }, { v: x.parts || '', wrap: true },
+      { v: num(x.meter), fmt: INT }, { v: num(x.laborHours) }, { v: num(x.partsCost) || 0, fmt: MONEY }, { v: num(x.laborCost) || 0, fmt: MONEY },
+      { v: num(x.otherCost) || 0, fmt: MONEY }, { f: `SUM(K${r + 1}:M${r + 1})`, fmt: MONEY, bold: true }, { v: x.vendor || '' },
+      { v: who(x) }, { v: x.priority || '' }, x.dueDate ? { date: x.dueDate, fmt: DATE } : { v: '' }, { v: x.requestedBy || '' }, { v: x.workDone || '', wrap: true }];
+    row.forEach((cell, c) => wl.cells.push(Object.assign({ r, c }, cell)));
+  });
+  const last = Math.max(recs.length + 1, 2);
+  wl.autoFilter = `A1:T${last}`;
+
+  /* ---- Units ---- */
+  const us = units.slice().sort((a, b) => String(a.unit).localeCompare(String(b.unit), undefined, { numeric: true }));
+  const uHead = ['Unit', 'Description', 'Type', 'Make', 'Model', 'Year', 'Serial / VIN', 'Status', 'Meter', 'Meter type', 'PM every', 'PM every (days)', 'PM status (at export)', 'Notes'];
+  const ut = { name: 'Units', cols: [10, 28, 16, 14, 14, 7, 18, 13, 10, 10, 10, 13, 30, 36], cells: [], freeze: { row: 1, col: 1 } };
+  uHead.forEach((h, c) => ut.cells.push({ r: 0, c, v: h, head: true }));
+  us.forEach((u, i) => {
+    const r = i + 1, pm = pmText(u);
+    [{ v: u.unit, bold: true }, { v: u.name || '' }, { v: u.type || '' }, { v: u.make || '' }, { v: u.model || '' }, { v: u.year || '' }, { v: u.serial || '' },
+     { v: u.status || 'Running', tone: u.status === 'Down' ? 'bad' : u.status === 'Out of service' ? 'muted' : 'ok' },
+     { v: helpers.curMeter(u) || null, fmt: INT }, { v: u.meterType || '' }, { v: num(u.pmMeter), fmt: INT }, { v: num(u.pmDays) },
+     { v: pm ? pm.text : '', tone: pm ? pm.level : null }, { v: u.notes || '', wrap: true }]
+      .forEach((cell, c) => ut.cells.push(Object.assign({ r, c }, cell)));
+  });
+  ut.autoFilter = `A1:N${Math.max(us.length + 1, 2)}`;
+
+  /* ---- Dashboard ---- */
+  const R = 5000, W = n => `'Work Log'!$${n}$2:$${n}$${R}`;
+  const D = W('A'), UN = W('C'), TY = W('E'), ST = W('F'), TOT = W('N'), WHO = W('P'), DUE = W('R');
+  const db = { name: 'Dashboard', cols: [14, 30, 14, 34, 9, 14, 16, 16, 16, 13], cells: [] };
+  db.cells.push({ r: 0, c: 0, v: 'Fleet Maintenance Log', title: true });
+  db.cells.push({ r: 1, c: 0, v: `Exported ${todayIso}. Dollar figures and counts are formulas over the Work Log and Units tabs, so they update if you add or edit rows there.`, muted: true });
+  const kpis = [
+    ['Units', `COUNTA(Units!$A$2:$A$${R})`, INT],
+    ['Down now', `COUNTIF(Units!$H$2:$H$${R},"Down")`, INT],
+    ['Open work orders', `COUNTIFS(${ST},"<>Completed",${ST},"<>")`, INT],
+    ['This month', `SUMIFS(${TOT},${D},">="&DATE(YEAR(TODAY()),MONTH(TODAY()),1))`, MONEY0],
+    ['Year to date', `SUMIFS(${TOT},${D},">="&DATE(YEAR(TODAY()),1,1))`, MONEY0],
+    ['All time', `SUM(${TOT})`, MONEY0]];
+  // KPI tiles laid out in pairs of columns: A, C, F, H … keep simple: one per column A..F
+  const kc = [0, 2, 4, 6, 7, 8];
+  kpis.forEach(([l, f, fmt], i) => { db.cells.push({ r: 3, c: kc[i], v: l, kpiLabel: true }); db.cells.push({ r: 4, c: kc[i], f, fmt, kpi: true }); });
+
+  // Cost by unit
+  let r = 6;
+  db.cells.push({ r, c: 0, v: 'Cost by unit', section: true });
+  r++;
+  const cuHead = ['Unit', 'Equipment', 'Status', 'PM status (at export)', 'Jobs', 'Repairs $', 'Service & insp. $', 'This year $', 'All time $', 'Last work'];
+  cuHead.forEach((h, c) => db.cells.push({ r, c, v: h, head: true }));
+  const labels = us.map(u => ({ unit: u.unit, name: u.name || u.type || '', status: u.status || 'Running', pm: pmText(u) }));
+  const known = new Set(us.map(u => u.unit));
+  [...new Set(recs.map(label))].filter(l => !known.has(l)).forEach(l => labels.push({ unit: l, name: '(removed from fleet)', status: '', pm: null }));
+  const first = r + 2;
+  labels.forEach(L => {
+    r++; const a = `$A${r + 1}`;
+    [{ v: L.unit, bold: true }, { v: L.name }, { v: L.status, tone: L.status === 'Down' ? 'bad' : L.status === 'Running' ? 'ok' : 'muted' },
+     { v: L.pm ? L.pm.text : '', tone: L.pm ? L.pm.level : null },
+     { f: `COUNTIF(${UN},${a})`, fmt: INT },
+     { f: `SUMIFS(${TOT},${UN},${a},${TY},"Repair")`, fmt: MONEY },
+     { f: `SUMIFS(${TOT},${UN},${a},${TY},"<>Repair")`, fmt: MONEY },
+     { f: `SUMIFS(${TOT},${UN},${a},${D},">="&DATE(YEAR(TODAY()),1,1))`, fmt: MONEY },
+     { f: `SUMIFS(${TOT},${UN},${a})`, fmt: MONEY, bold: true },
+     { f: `IFERROR(LOOKUP(2,1/(${UN}=${a}),${D}),"")`, fmt: DATE }]
+      .forEach((cell, c) => db.cells.push(Object.assign({ r, c }, cell)));
+  });
+  if (!labels.length) { r++; db.cells.push({ r, c: 0, v: 'No units yet. Add units in the app, then export again.', muted: true }); }
+  else {
+    const lastU = r + 1; r++;
+    db.cells.push({ r, c: 0, v: 'Total', bold: true, totalRow: true });
+    for (let c = 4; c <= 8; c++) { const L2 = colL(c); db.cells.push({ r, c, f: `SUM(${L2}${first}:${L2}${lastU})`, fmt: c === 4 ? INT : MONEY, bold: true, totalRow: true }); }
+  }
+
+  // Open work orders by person
+  const people = (helpers.employees || []).map(e => e.name).filter(Boolean).sort((a, b) => a.localeCompare(b));
+  recs.forEach(x => { const n = who(x); if (n && people.indexOf(n) === -1) people.push(n); });
+  if (people.length || recs.some(x => x.status === 'open')) {
+    r += 2;
+    db.cells.push({ r, c: 0, v: 'Open work orders by person', section: true });
+    r++;
+    ['Person', 'Open', 'Overdue'].forEach((h, c) => db.cells.push({ r, c, v: h, head: true }));
+    const openCrit = `${ST},"<>Completed",${ST},"<>"`;
+    const pFirst = r + 2;
+    people.forEach(n => {
+      r++; const a = `$A${r + 1}`;
+      db.cells.push({ r, c: 0, v: n, bold: true });
+      db.cells.push({ r, c: 1, f: `COUNTIFS(${WHO},${a},${openCrit})`, fmt: INT });
+      db.cells.push({ r, c: 2, f: `COUNTIFS(${WHO},${a},${openCrit},${DUE},"<"&TODAY(),${DUE},"<>")`, fmt: INT });
+    });
+    const pLast = r + 1; r++;
+    const sumP = col => people.length ? `-SUM(${col}${pFirst}:${col}${pLast})` : '';
+    db.cells.push({ r, c: 0, v: 'Unassigned', bold: true, muted: true });
+    db.cells.push({ r, c: 1, f: `COUNTIFS(${openCrit})${sumP('B')}`, fmt: INT });
+    db.cells.push({ r, c: 2, f: `COUNTIFS(${openCrit},${DUE},"<"&TODAY(),${DUE},"<>")${sumP('C')}`, fmt: INT });
+  }
+
+  // Cost by month (last 12 months)
+  r += 2;
+  db.cells.push({ r, c: 0, v: 'Cost by month (last 12 months)', section: true });
+  r++;
+  ['Month', 'Repairs $', 'Service & insp. $', 'Total $', 'Jobs'].forEach((h, c) => db.cells.push({ r, c, v: h, head: true }));
+  const [ty, tm] = todayIso.split('-').map(Number);
+  const mFirst = r + 2;
+  for (let k = 11; k >= 0; k--) {
+    r++; let y = ty, m = tm - k; while (m < 1) { m += 12; y--; }
+    const iso = `${y}-${String(m).padStart(2, '0')}-01`, a = `$A${r + 1}`;
+    const rng = `${D},">="&${a},${D},"<"&EDATE(${a},1)`;
+    [{ date: iso, fmt: MONTH, bold: true },
+     { f: `SUMIFS(${TOT},${rng},${TY},"Repair")`, fmt: MONEY },
+     { f: `SUMIFS(${TOT},${rng},${TY},"<>Repair")`, fmt: MONEY },
+     { f: `SUMIFS(${TOT},${rng})`, fmt: MONEY, bold: true },
+     { f: `COUNTIFS(${rng})`, fmt: INT }]
+      .forEach((cell, c) => db.cells.push(Object.assign({ r, c }, cell)));
+  }
+  const mLast = r + 1; r++;
+  db.cells.push({ r, c: 0, v: '12-month total', bold: true, totalRow: true });
+  for (let c = 1; c <= 4; c++) { const L2 = colL(c); db.cells.push({ r, c, f: `SUM(${L2}${mFirst}:${L2}${mLast})`, fmt: c === 4 ? INT : MONEY, bold: true, totalRow: true }); }
+  r += 2;
+  db.cells.push({ r, c: 0, v: 'Tip: on the Work Log tab, use the filter arrows (Status, Assigned to, a single Unit, or a Type) to see just those jobs.', muted: true });
+
+  return [db, wl, ut];
+}
+
+/* ---------- Excel export ---------- */
+let excelLib=null;
+function loadExcel(){
+  if(window.ExcelJS)return Promise.resolve(window.ExcelJS);
+  if(excelLib)return excelLib;
+  excelLib=new Promise((ok,no)=>{const sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js";
+    sc.onload=()=>ok(window.ExcelJS);sc.onerror=()=>{excelLib=null;no(new Error("load"))};document.head.appendChild(sc)});
+  return excelLib;
+}
+async function exportExcel(btn){
+  if(!S.units.length&&!S.records.length){toast("Nothing to export yet. Add a unit and log some work first.");return}
+  const old=btn?btn.textContent:"";if(btn){btn.disabled=true;btn.textContent="Building Excel…"}
+  try{
+    const ExcelJS=await loadExcel();
+    const sheets=fleetWorkbookSpec(S.units,S.records,today(),{total,wo,meterUnit,curMeter,pmText:pmStatus,stageLabel,empName,employees:S.employees});
+    const wb=new ExcelJS.Workbook();wb.creator="Fleet Maintenance Log";wb.created=new Date();
+    const F="Arial",STEEL="FF26303A",ORANGE="FFC2410C",TONE={ok:"FF2C7A4B",bad:"FFB42318",warn:"FFA86A12",muted:"FF6B6E73"};
+    for(const sp of sheets){
+      const ws=wb.addWorksheet(sp.name,{views:sp.freeze?[{state:"frozen",ySplit:sp.freeze.row,xSplit:sp.freeze.col}]:[{showGridLines:sp.name!=="Dashboard"}]});
+      sp.cols.forEach((w,i)=>ws.getColumn(i+1).width=w);
+      for(const c of sp.cells){
+        const cell=ws.getCell(c.r+1,c.c+1);
+        if(c.f!=null)cell.value={formula:c.f};
+        else if(c.date){const[y,m,d]=c.date.split("-").map(Number);cell.value=new Date(Date.UTC(y,m-1,d))}
+        else if(c.v!=null&&c.v!=="")cell.value=c.v;
+        if(c.fmt)cell.numFmt=c.fmt;
+        const font={name:F,size:10};
+        if(c.bold)font.bold=true;
+        if(c.tone&&TONE[c.tone]){font.color={argb:TONE[c.tone]};font.bold=true}
+        if(c.muted){font.color={argb:TONE.muted};font.italic=true}
+        if(c.title){font.size=18;font.bold=true;font.color={argb:STEEL}}
+        if(c.section){font.size=12;font.bold=true;font.color={argb:STEEL};cell.border={bottom:{style:"medium",color:{argb:ORANGE}}}}
+        if(c.kpiLabel){font.size=9;font.bold=true;font.color={argb:TONE.muted}}
+        if(c.kpi){font.size=16;font.bold=true;font.color={argb:STEEL}}
+        if(c.head){font.bold=true;font.color={argb:"FFFFFFFF"};cell.fill={type:"pattern",pattern:"solid",fgColor:{argb:STEEL}};cell.alignment={vertical:"middle",wrapText:true}}
+        if(c.totalRow)cell.border={top:{style:"thin",color:{argb:STEEL}}};
+        if(c.wrap)cell.alignment={wrapText:true,vertical:"top"};
+        cell.font=font;
+      }
+      if(sp.autoFilter)ws.autoFilter=sp.autoFilter;
+      if(sp.name!=="Dashboard")ws.getRow(1).height=20;
+    }
+    const buf=await wb.xlsx.writeBuffer();
+    await S.dl.save({filename:`Fleet-Maintenance-${today()}.xlsx`,data:new Blob([buf],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"})});
+  }catch(e){toast(e&&e.message==="load"?"Couldn't load the Excel builder. Check your connection and try again.":"Couldn't build the Excel file.")}
+  finally{if(btn){btn.disabled=false;btn.textContent=old}}
+}
+
+
+/* ---------- Work orders ---------- */
+function renderOrders(){
+  const v=$("#view"),f=S.wo,me=S.me&&empById(S.me)?S.me:"";
+  if(S.status==="loading"&&!S.records.length){v.innerHTML=`<div class="empty"><p>Loading work orders…</p></div>`;return}
+  if(f.view==="mine"&&!me)f.view="open";
+  const openAll=S.records.filter(r=>r.status==="open");
+  const cutoff=iso(new Date(Date.now()-30*864e5));
+  const views=[["open","All open",openAll.length]].concat(me?[["mine","My jobs",openAll.filter(r=>r.assignedTo===me).length]]:[],
+    [["unassigned","Unassigned",openAll.filter(r=>!r.assignedTo).length],["done","Done · 30 days",null]]);
+  let list;
+  if(f.view==="done")list=S.records.filter(r=>r.status!=="open"&&(r.date||"")>=cutoff).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  else list=openAll.filter(r=>f.view==="mine"?r.assignedTo===me:f.view==="unassigned"?!r.assignedTo:true)
+    .sort((a,b)=>(isOverdue(b)-isOverdue(a))||(priRank(a.priority)-priRank(b.priority))||((a.dueDate||"9999").localeCompare(b.dueDate||"9999"))||((a.date||"").localeCompare(b.date||"")));
+  const emps=sortedEmps();
+  const meRow=`<div class="me-row"><span>This phone belongs to</span>${emps.length?`<select id="meSel" aria-label="Who uses this phone"><option value="">Choose your name…</option>${emps.map(e=>`<option value="${h(e.id)}" ${me===e.id?"selected":""}>${h(e.name)}</option>`).join("")}</select>`:`<span>— add your team first</span>`}<span class="sp" style="flex:1"></span>${S.canWrite?`<button class="btn small" id="teamBtn" type="button">Team${emps.length?` (${emps.length})`:""}</button>`:""}</div>`;
+  const chips=`<div class="toolbar"><div class="chips" role="group" aria-label="Show">${views.map(([k,l,n])=>`<button class="chip" type="button" data-view="${k}" aria-pressed="${f.view===k}">${l}${n!=null?` <span class="n">${n}</span>`:""}</button>`).join("")}</div></div>`;
+  const card=r=>{const u=unitById(r.unitId);return`<button class="wo" type="button" data-wo="${h(r.id)}" data-pri="${h(r.priority||"Normal")}">
+    <div class="wo-top"><span class="tag">${h(unitLabel(r.unitId))}</span><span class="wo-title">${h(r.description||"(no description)")}</span>${r.priority==="Urgent"||r.priority==="High"?`<span class="pri ${h(r.priority)}">${h(r.priority)}</span>`:""}</div>
+    <div class="wo-meta">${whoHtml(r)}${dueHtml(r)}<span class="kind ${h(r.kind)}">${h(r.kind)}</span><span class="mono">${wo(r)}</span></div></button>`};
+  let body;
+  if(f.view==="done")body=list.length?rowsHtml(list):`<div class="empty"><p>No work orders completed in the last 30 days.</p></div>`;
+  else if(!list.length){
+    const msg=f.view==="mine"?"Nothing is assigned to you right now.":f.view==="unassigned"?"Every open work order has someone on it.":"No open work orders.";
+    body=`<div class="empty"><h3>${msg}</h3><p>${f.view==="open"?"Tap + Work order to write one up, assign it to someone and send it to their phone.":""}</p>${S.canWrite&&f.view==="open"?`<button class="btn primary" id="woFirst" type="button">+ Work order</button>`:""}</div>`;
+  }else body=STAGES.map(([k,l])=>{const g=list.filter(r=>stageOf(r)===k);return g.length?`<section class="wo-group"><h3>${l} <b>${g.length}</b></h3><div class="wos">${g.map(card).join("")}</div></section>`:""}).join("");
+  v.innerHTML=meRow+chips+body;
+  v.querySelectorAll("[data-view]").forEach(b=>b.onclick=()=>{f.view=b.dataset.view;renderOrders()});
+  v.querySelectorAll("[data-wo]").forEach(b=>b.onclick=()=>woDetail(b.dataset.wo));
+  bindRows(v);
+  const ms=$("#meSel");if(ms)ms.onchange=()=>{S.me=ms.value;try{localStorage.setItem("fml-me",S.me)}catch(_){}if(S.me){f.view="mine";toast("This phone is set to "+empById(S.me).name)}renderOrders()};
+  const tb=$("#teamBtn");if(tb)tb.onclick=()=>teamSheet();
+  const wf=$("#woFirst");if(wf)wf.onclick=()=>workForm();
+}
+
+function woDetail(id,opt={}){
+  const r=S.records.find(x=>x.id===id);if(!r){toast("That work order wasn't found. It may have been deleted.");return}
+  const u=unitById(r.unitId),st=stageOf(r),emp=r.assignedTo&&empById(r.assignedTo),name=empName(r),me=S.me&&empById(S.me)?S.me:"";
+  const open=r.status==="open",cw=S.canWrite;
+  const msg=woMessage(r),subj=`Work order ${wo(r)} – ${unitLabel(r.unitId)}`;
+  const ph=emp&&phoneDigits(emp.phone),em=emp&&emp.email;
+  const dl=[["Unit",`${unitLabel(r.unitId)}${u&&u.name?" — "+u.name:""}`],["Type",r.kind],["Assigned to",name||"Unassigned"],["Requested by",r.requestedBy],["Source",r.source],["Reported again",r.checkLog],
+    ["Opened",fmtDate(r.date)],["Due",r.dueDate?fmtDate(r.dueDate):""],["Meter",r.meter?numv(r.meter).toLocaleString()+" "+meterUnit(u):""],
+    ["Work performed",r.workDone],["Parts used",r.parts],["Labor hours",r.laborHours||""],["Vendor / tech",r.vendor],
+    ["Cost",total(r)?money(total(r)):""],["Completed",r.completedAt?fmtDate(String(r.completedAt).slice(0,10)):""]].filter(x=>x[1]);
+  openSheet(`${wo(r)} · ${h(unitLabel(r.unitId))}`,`
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="stage ${st}">${h(stageLabel(r))}</span>${r.priority&&r.priority!=="Normal"?`<span class="pri ${h(r.priority)}">${h(r.priority)} priority</span>`:""}${dueHtml(r)}</div>
+    <p class="wo-desc">${h(r.description||"(no description)")}</p>
+    ${open&&cw?`<div class="f"><span class="lbl">Update status</span><div class="seg wrap4" id="dStage">${STAGES.map(([k,l])=>`<button type="button" data-s="${k}" aria-pressed="${st===k}">${k==="waiting"?"Waiting parts":l}</button>`).join("")}</div></div>
+      <div class="actions">${me&&r.assignedTo!==me?`<button class="btn" id="dMine" type="button">Assign to me</button>`:""}<button class="btn primary" id="dDone" type="button">Complete job…</button></div>`:""}
+    <dl class="dl">${dl.map(([k,v])=>`<dt>${k}</dt><dd>${h(v)}</dd>`).join("")}</dl>
+    <div class="share-box ${opt.notify?"notify":""}">
+      <span class="lbl">${opt.notify&&name?`Let ${h(name)} know`:"Send this work order"}</span>
+      <div class="actions">
+        ${ph?`<a class="btn ${opt.notify?"primary":""}" href="sms:${h(ph)}?body=${encodeURIComponent(msg)}">Text ${h(emp.name.split(" ")[0])}</a>`:""}
+        ${em?`<a class="btn ${opt.notify&&!ph?"primary":""}" href="mailto:${h(em)}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(msg)}">Email ${h(emp.name.split(" ")[0])}</a>`:""}
+        ${navigator.share?`<button class="btn" id="dShare" type="button">Share…</button>`:""}
+        <button class="btn" id="dCopy" type="button">Copy link</button>
+        <button class="btn" id="dPrint" type="button">Print</button>
+      </div>
+      ${emp&&!ph&&!em?`<span class="note">Add a phone number for ${h(emp.name)} under Team to text work orders straight to them.</span>`:""}
+    </div>`,
+    `${cw?`<button class="btn small" id="dEdit" type="button">Edit</button>`:""}<span class="sp"></span><button class="btn" data-close type="button">Close</button>`,
+    sc=>{
+      const upd=async(data,label)=>{try{await S.db.collection("records").doc(r.id).update(Object.assign({updatedAt:new Date().toISOString()},data));toast(label);if($("#scrim"))woDetail(r.id)}catch(e){toast(errMsg(e))}};
+      sc.querySelectorAll("#dStage button").forEach(b=>b.onclick=()=>{if(b.getAttribute("aria-pressed")==="true")return;
+        sc.querySelectorAll("#dStage button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+        const k=b.dataset.s,extra=k==="in_progress"&&!r.assignedTo&&me?{assignedTo:me,assignedName:empById(me).name}:{};
+        upd(Object.assign({stage:k},extra),`${wo(r)} marked ${k==="waiting"?"waiting on parts":k==="in_progress"?"in progress":"open"}`)});
+      const dm=$("#dMine");if(dm)dm.onclick=()=>upd({assignedTo:me,assignedName:empById(me).name},`${wo(r)} assigned to you`);
+      const dd=$("#dDone");if(dd)dd.onclick=()=>workForm({recId:r.id,complete:true});
+      const de=$("#dEdit");if(de)de.onclick=()=>workForm({recId:r.id});
+      const ds=$("#dShare");if(ds)ds.onclick=async()=>{try{await navigator.share({title:subj,text:msg})}catch(_){}};
+      $("#dCopy").onclick=async()=>{const link=woLink(r);try{await navigator.clipboard.writeText(link);toast("Link copied")}catch(_){openSheet("Copy link",`<textarea class="copybox" id="cb" readonly style="min-height:80px">${h(link)}</textarea>`,`<span class="sp"></span><button class="btn" data-close type="button">Done</button>`,()=>{const c=$("#cb");c.focus();c.select()})}};
+      $("#dPrint").onclick=()=>printWO(r);
+    });
+}
+
+function printWO(r){
+  const u=unitById(r.unitId)||{};const e=h;
+  const blankRows=n=>Array.from({length:n},()=>`<tr><td>&nbsp;</td><td></td><td></td><td></td></tr>`).join("");
+  $("#printArea").innerHTML=`<div class="pwo">
+    <div class="hd"><div><h1>Work Order</h1><div>Fleet Maintenance Log</div></div><div class="won">${e(wo(r))}</div></div>
+    <table>
+      <tr><th>Unit</th><td><b>${e(unitLabel(r.unitId))}</b> ${e(u.name||u.type||"")}</td><th>Opened</th><td>${e(fmtDate(r.date))}</td></tr>
+      <tr><th>Make / model</th><td>${e([u.make,u.model,u.year].filter(Boolean).join(" "))}</td><th>Serial</th><td>${e(u.serial||"")}</td></tr>
+      <tr><th>Type</th><td>${e(r.kind||"")}</td><th>Priority</th><td>${e(r.priority||"Normal")}</td></tr>
+      <tr><th>Assigned to</th><td>${e(empName(r)||"")}</td><th>Due</th><td>${e(r.dueDate?fmtDate(r.dueDate):"")}</td></tr>
+      <tr><th>Requested by</th><td>${e(r.requestedBy||"")}</td><th>Status</th><td>${e(stageLabel(r))}</td></tr>
+    </table>
+    <h2>Problem / work requested</h2><div class="box">${e(r.description||"")}</div>
+    <h2>Work performed</h2>${r.workDone?`<div class="box">${e(r.workDone)}</div>`:`<div class="lines">${"<div></div>".repeat(5)}</div>`}
+    <h2>Parts used</h2><table><tr><th style="width:10%">Qty</th><th style="width:25%">Part #</th><th>Description</th><th style="width:15%">Cost</th></tr>${r.parts?`<tr><td></td><td></td><td>${e(r.parts)}</td><td>${numv(r.partsCost)?money(numv(r.partsCost)):""}</td></tr>`:""}${blankRows(r.parts?3:5)}</table>
+    <table><tr><th>Labor hours</th><td>${e(r.laborHours||"")}</td><th>Meter at finish</th><td>${e(r.meter||"")} ${e(meterUnit(u))}</td></tr></table>
+    <div class="sig"><div>Technician signature &nbsp;/&nbsp; date</div><div>Supervisor sign-off &nbsp;/&nbsp; date</div></div>
+    <div class="ft">Printed ${e(fmtDate(today()))} · ${e(woLink(r))}</div></div>`;
+  setTimeout(()=>window.print(),50);
+}
+
+function teamSheet(editId){
+  const emps=sortedEmps(),ed=editId?empById(editId):null;
+  const openCount=id=>S.records.filter(r=>r.status==="open"&&r.assignedTo===id).length;
+  openSheet("Team",`
+    <p class="note" style="margin:0">People you can assign work orders to. Add a cell number to text them their jobs.</p>
+    <div>${emps.length?emps.map(e=>`<div class="team-row"><span class="av" style="width:34px;height:34px;font-size:.8rem">${h(initials(e.name))}</span><div class="nm"><b>${h(e.name)}</b>${e.role?` · ${h(e.role)}`:""}<small>${h([e.phone,e.email].filter(Boolean).join(" · ")||"No contact info")} · ${openCount(e.id)} open</small></div><button class="btn small" type="button" data-edit="${h(e.id)}">Edit</button></div>`).join(""):`<p class="note">No one added yet.</p>`}</div>
+    <div class="section-lbl">${ed?`Edit ${h(ed.name)}`:"Add a person"}</div>
+    <div class="g2"><div class="f"><label for="eName">Name</label><input type="text" id="eName" value="${h(ed?ed.name:"")}" placeholder="e.g. Mike Johnson" autocomplete="off"></div>
+      <div class="f"><label for="eRole">Role</label><input type="text" id="eRole" value="${h(ed?ed.role||"":"")}" placeholder="e.g. Mechanic"></div></div>
+    <div class="g2"><div class="f"><label for="ePhone">Cell phone</label><input type="tel" id="ePhone" value="${h(ed?ed.phone||"":"")}" placeholder="910-555-0123" autocomplete="off"></div>
+      <div class="f"><label for="eEmail">Email</label><input type="email" id="eEmail" value="${h(ed?ed.email||"":"")}" placeholder="optional" autocomplete="off"></div></div>
+    <div class="err" id="eErr" role="alert"></div>`,
+    `${ed?`<button class="btn danger small" id="eDel" type="button">Remove</button><button class="btn ghost small" id="eNew" type="button">Cancel edit</button>`:""}<span class="sp"></span><button class="btn ghost" data-close type="button">Done</button><button class="btn primary" id="eSave" type="button">${ed?"Save":"Add person"}</button>`,
+    sc=>{
+      sc.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>teamSheet(b.dataset.edit));
+      const nw=$("#eNew");if(nw)nw.onclick=()=>teamSheet();
+      const del=$("#eDel");if(del){let armed=false;del.onclick=async()=>{if(!armed){armed=true;del.textContent="Tap again to remove";return}
+        del.disabled=true;try{await S.db.collection("employees").doc(ed.id).delete();if(S.me===ed.id){S.me="";try{localStorage.removeItem("fml-me")}catch(_){}}toast(`${ed.name} removed. Their past work orders keep their name.`);teamSheet()}catch(e){$("#eErr").textContent=errMsg(e);del.disabled=false}}}
+      $("#eSave").onclick=async()=>{
+        const name=$("#eName").value.trim();if(!name){$("#eErr").textContent="Enter the person's name.";$("#eName").focus();return}
+        if(S.employees.some(x=>x.name.toLowerCase()===name.toLowerCase()&&(!ed||x.id!==ed.id))){$("#eErr").textContent=`${name} is already on the team.`;return}
+        const data={name,role:$("#eRole").value.trim(),phone:$("#ePhone").value.trim(),email:$("#eEmail").value.trim(),createdAt:ed?ed.createdAt:new Date().toISOString()};
+        const btn=$("#eSave");btn.disabled=true;btn.textContent="Saving…";
+        try{const col=S.db.collection("employees");await (ed?col.doc(ed.id):col.doc()).set(data);toast(ed?"Saved":`${name} added`);teamSheet()}
+        catch(e){$("#eErr").textContent=errMsg(e);btn.disabled=false;btn.textContent=ed?"Save":"Add person"}
+      };
+      if(!ed)setTimeout(()=>{const n=$("#eName");if(n&&!emps.length)n.focus()},50);
+    });
+}
+
+/* ---------- Sheet ---------- */
+function openSheet(title,body,foot,mount){
+  $("#sheetRoot").innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="${h(title)}"><div class="sheet-h"><h2>${title}</h2><button class="x" data-close type="button" aria-label="Close">×</button></div><div class="sheet-b">${body}</div>${foot?`<div class="sheet-f">${foot}</div>`:""}</div></div>`;
+  const sc=$("#scrim");sc.addEventListener("mousedown",e=>{if(e.target===sc)closeSheet()});
+  sc.querySelectorAll("[data-close]").forEach(b=>b.onclick=closeSheet);
+  document.body.style.overflow="hidden";
+  if(mount)mount(sc);
+}
+function closeSheet(){$("#sheetRoot").innerHTML="";document.body.style.overflow=""}
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&$("#scrim"))closeSheet()});
+
+/* ---------- Work form ---------- */
+function workForm({recId,unitId,complete}={}){
+  if(!S.db){toast("Data isn't available in this view");return}
+  if(!S.units.length){unitForm();toast("Add a unit first, then write up work orders for it");return}
+  const ex=recId?S.records.find(r=>r.id===recId):null;
+  const r=ex||{unitId:unitId||(S.hist.unit!=="all"?S.hist.unit:""),kind:"Repair",date:today(),status:"open",stage:"open",priority:"Normal",
+    assignedTo:S.tab==="orders"&&S.wo.view==="mine"&&S.me?S.me:""};
+  let kind=r.kind||"Repair",pri=r.priority||"Normal",st=complete?"done":stageOf(r);
+  const wasOpen=!ex||ex.status==="open";
+  const date0=complete&&wasOpen?today():r.date;
+  const ro=!S.canWrite,dis=ro?"disabled":"";
+  const emps=sortedEmps();
+  const STG=[["open","Open"],["in_progress","In progress"],["waiting","Waiting parts"],["done","Completed"]];
+  openSheet(ex?(complete?`Complete ${wo(ex)}`:`Edit ${wo(ex)}`)+` · ${h(unitLabel(ex.unitId))}`:"New work order",`
+    <div class="f"><label for="wUnit">Unit</label><select id="wUnit" ${dis}><option value="">Choose a unit…</option>${sortedUnits().map(u=>`<option value="${h(u.id)}" ${r.unitId===u.id?"selected":""}>${h(u.unit)} — ${h(u.name||u.type||"")}</option>`).join("")}</select></div>
+    <div class="f"><span class="lbl">Type of work</span><div class="seg" id="wKind">${KINDS.map(k=>`<button type="button" aria-pressed="${k===kind}" data-k="${k}" ${dis}>${k}</button>`).join("")}</div></div>
+    <div class="f"><label for="wDesc">Problem / work to do</label><textarea id="wDesc" placeholder="e.g. Hydraulic leak at tilt cylinder, mast drifts down when parked" ${dis}>${h(r.description||"")}</textarea></div>
+    <div class="g2"><div class="f"><label for="wWho">Assign to</label><select id="wWho" ${dis}><option value="">Unassigned</option>${emps.map(e=>`<option value="${h(e.id)}" ${r.assignedTo===e.id?"selected":""}>${h(e.name)}</option>`).join("")}</select>${emps.length?"":`<span class="hint">Add people under Work orders → Team.</span>`}</div>
+      <div class="f"><label for="wPri">Priority</label><select id="wPri" ${dis}>${PRIS.map(p=>`<option ${pri===p?"selected":""}>${p}</option>`).join("")}</select></div></div>
+    <div class="g2"><div class="f"><label for="wDue">Due date</label><input type="date" id="wDue" value="${h(r.dueDate||"")}" ${dis}></div>
+      <div class="f"><label for="wReq">Requested by</label><input type="text" id="wReq" value="${h(r.requestedBy||"")}" placeholder="Who reported it" ${dis}></div></div>
+    <div class="f"><span class="lbl">Status</span><div class="seg wrap4" id="wStat">${STG.map(([k,l])=>`<button type="button" data-s="${k}" aria-pressed="${st===k}" ${dis}>${l}</button>`).join("")}</div></div>
+    <div class="section-lbl">Work done &amp; cost <span class="hint" style="text-transform:none;letter-spacing:0;font-family:var(--body)">· fill in when the job is finished</span></div>
+    <div class="f"><label for="wDone">Work performed</label><textarea id="wDone" placeholder="e.g. Replaced hose on tilt cylinder, topped off hydraulic fluid, tested" ${dis}>${h(r.workDone||"")}</textarea></div>
+    <div class="g2"><div class="f"><label for="wDate" id="wDateL">${st==="done"?"Date completed":"Date opened"}</label><input type="date" id="wDate" value="${h(date0)}" ${dis}></div>
+      <div class="f"><label for="wMeter">Meter reading <span id="wMU"></span></label><input type="number" id="wMeter" inputmode="decimal" min="0" step="any" value="${h(r.meter||"")}" placeholder="e.g. 4210" ${dis}></div></div>
+    <div class="f"><label for="wParts">Parts used</label><input type="text" id="wParts" value="${h(r.parts||"")}" placeholder="Part numbers, qty" ${dis}></div>
+    <div class="g3"><div class="f"><label for="wPC">Parts $</label><input type="number" id="wPC" inputmode="decimal" min="0" step="0.01" value="${h(r.partsCost||"")}" placeholder="0" ${dis}></div>
+      <div class="f"><label for="wLC">Labor $</label><input type="number" id="wLC" inputmode="decimal" min="0" step="0.01" value="${h(r.laborCost||"")}" placeholder="0" ${dis}></div>
+      <div class="f"><label for="wOC">Other $</label><input type="number" id="wOC" inputmode="decimal" min="0" step="0.01" value="${h(r.otherCost||"")}" placeholder="0" ${dis}></div></div>
+    <div class="g2"><div class="f"><label for="wLH">Labor hours</label><input type="number" id="wLH" inputmode="decimal" min="0" step="0.25" value="${h(r.laborHours||"")}" placeholder="0" ${dis}></div>
+      <div class="f"><label for="wVen">Vendor / tech</label><input type="text" id="wVen" value="${h(r.vendor||"")}" placeholder="In-house, dealer…" ${dis}></div></div>
+    <div class="total-line"><span class="lbl">Job total</span><b class="num" id="wTot">$0</b></div>
+    <div class="err" id="wErr" role="alert"></div>`,
+    ro?`<span class="sp"></span><button class="btn" data-close type="button">Close</button>`:
+    `${ex?`<button class="btn danger small" id="wDel" type="button">Delete</button>`:""}<span class="sp"></span><button class="btn ghost" data-close type="button">Cancel</button><button class="btn primary" id="wSave" type="button">${ex?(complete?"Complete job":"Save changes"):"Save work order"}</button>`,
+    sc=>{
+      const upd=()=>{$("#wTot").textContent=money(numv($("#wPC").value)+numv($("#wLC").value)+numv($("#wOC").value));const u=unitById($("#wUnit").value);$("#wMU").textContent=u&&meterUnit(u)?`(${meterUnit(u)})`:""};
+      ["wPC","wLC","wOC"].forEach(i=>$("#"+i).oninput=upd);$("#wUnit").onchange=upd;upd();
+      sc.querySelectorAll("#wKind button").forEach(b=>b.onclick=()=>{kind=b.dataset.k;sc.querySelectorAll("#wKind button").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+      sc.querySelectorAll("#wStat button").forEach(b=>b.onclick=()=>{st=b.dataset.s;sc.querySelectorAll("#wStat button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+        $("#wDateL").textContent=st==="done"?"Date completed":"Date opened";
+        if(st==="done"&&wasOpen&&ex)$("#wDate").value=today();});
+      if(ro)return;
+      if(complete)setTimeout(()=>$("#wDone").focus(),80);
+      else if(!ex)setTimeout(()=>{(r.unitId?$("#wDesc"):$("#wUnit")).focus()},50);
+      const del=$("#wDel");if(del){let armed=false;del.onclick=async()=>{if(!armed){armed=true;del.textContent="Tap again to delete";return}
+        del.disabled=true;try{await S.db.collection("records").doc(ex.id).delete();closeSheet();toast(`${wo(ex)} deleted`)}catch(e){$("#wErr").textContent=errMsg(e);del.disabled=false}}}
+      $("#wSave").onclick=async()=>{
+        const unitId=$("#wUnit").value,desc=$("#wDesc").value.trim(),date=$("#wDate").value,who=$("#wWho").value;
+        if(!unitId){$("#wErr").textContent="Choose which unit this is for.";return}
+        if(!desc){$("#wErr").textContent="Describe the problem or the work to do.";$("#wDesc").focus();return}
+        if(!date){$("#wErr").textContent="Enter the date.";return}
+        const done=st==="done";
+        const data={unitId,unitNumber:(unitById(unitId)||{}).unit||"",kind,date,status:done?"done":"open",stage:done?"done":st,
+          description:desc,workDone:$("#wDone").value.trim(),priority:$("#wPri").value,
+          assignedTo:who,assignedName:who?(empById(who)||{}).name||"":"",dueDate:$("#wDue").value||"",requestedBy:$("#wReq").value.trim(),
+          parts:$("#wParts").value.trim(),meter:numv($("#wMeter").value)||null,
+          partsCost:numv($("#wPC").value),laborCost:numv($("#wLC").value),otherCost:numv($("#wOC").value),laborHours:numv($("#wLH").value)||null,
+          vendor:$("#wVen").value.trim(),completedAt:done?(ex&&ex.completedAt&&ex.status!=="open"?ex.completedAt:new Date().toISOString()):"",
+          createdAt:ex?ex.createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
+        const btn=$("#wSave");btn.disabled=true;btn.textContent="Saving…";
+        try{
+          const col=S.db.collection("records"),ref=ex?col.doc(ex.id):col.doc();
+          await ref.set(data);
+          const u=unitById(unitId);
+          if(u&&data.meter&&data.meter>numv(u.meter)){try{await S.db.collection("units").doc(u.id).update({meter:data.meter})}catch(_){}}
+          const newlyAssigned=!done&&who&&(!ex||ex.assignedTo!==who);
+          closeSheet();
+          if(newlyAssigned){toast(`${wo({id:ref.id})} saved and assigned to ${data.assignedName}`);woDetail(ref.id,{notify:true})}
+          else toast(done?`${wo({id:ref.id})} completed`:ex?"Changes saved":`${wo({id:ref.id})} saved`);
+        }catch(e){$("#wErr").textContent=errMsg(e);btn.disabled=false;btn.textContent=ex?(complete?"Complete job":"Save changes"):"Save work order"}
+      };
+    });
+}
+function errMsg(e){const c=e&&e.code;
+  if(c==="unauthorized")return"The shop code was rejected. Enter the correct code and save again.";
+  if(c==="server")return"The log couldn't save that: "+(e.message||"unknown error");
+  return"Couldn't save right now. Check your connection and try again.";}
+
+/* ---------- Unit form ---------- */
+function unitForm(id){
+  if(!S.db){toast("Data isn't available in this view");return}
+  const ex=id?unitById(id):null;const u=ex||{type:"Forklift",meterType:"Hours",status:"Running"};
+  openSheet(ex?`Edit ${h(ex.unit)}`:"Add unit",`
+    <div class="g2"><div class="f"><label for="uNum">Unit number</label><input type="text" id="uNum" value="${h(u.unit||"")}" placeholder="e.g. FL-07"></div>
+      <div class="f"><label for="uType">Equipment type</label><select id="uType">${TYPES.map(t=>`<option ${u.type===t?"selected":""}>${t}</option>`).join("")}</select></div></div>
+    <div class="f"><label for="uName">Description</label><input type="text" id="uName" value="${h(u.name||"")}" placeholder="e.g. 5,000 lb LP forklift, Bay 2"></div>
+    <div class="g3"><div class="f"><label for="uMake">Make</label><input type="text" id="uMake" value="${h(u.make||"")}"></div>
+      <div class="f"><label for="uModel">Model</label><input type="text" id="uModel" value="${h(u.model||"")}"></div>
+      <div class="f"><label for="uYear">Year</label><input type="number" id="uYear" inputmode="numeric" value="${h(u.year||"")}"></div></div>
+    <div class="f"><label for="uSer">Serial / VIN</label><input type="text" id="uSer" value="${h(u.serial||"")}"></div>
+    <div class="g2"><div class="f"><label for="uMT">Meter</label><select id="uMT">${["Hours","Miles","None"].map(t=>`<option ${u.meterType===t?"selected":""}>${t}</option>`).join("")}</select></div>
+      <div class="f"><label for="uM">Current reading</label><input type="number" id="uM" inputmode="decimal" min="0" step="any" value="${h(u.meter||"")}"></div></div>
+    <div class="g2"><div class="f"><label for="uPM">PM every (hrs / mi)</label><input type="number" id="uPM" inputmode="decimal" min="0" value="${h(u.pmMeter||"")}" placeholder="e.g. 250"><span class="hint">Leave blank if not used</span></div>
+      <div class="f"><label for="uPD">or every (days)</label><input type="number" id="uPD" inputmode="numeric" min="0" value="${h(u.pmDays||"")}" placeholder="e.g. 90"></div></div>
+    <div class="f"><span class="lbl">Status</span><div class="seg" id="uStat">${["Running","Down","Out of service"].map(s=>`<button type="button" data-s="${s}" aria-pressed="${(u.status||"Running")===s}">${s}</button>`).join("")}</div></div>
+    <div class="f"><label for="uNotes">Notes</label><textarea id="uNotes" placeholder="Location, filters, tire size, key info…">${h(u.notes||"")}</textarea></div>
+    <div class="err" id="uErr" role="alert"></div>`,
+    `${ex?`<button class="btn danger small" id="uDel" type="button">Remove unit</button>`:""}<span class="sp"></span><button class="btn ghost" data-close type="button">Cancel</button><button class="btn primary" id="uSave" type="button">${ex?"Save changes":"Add unit"}</button>`,
+    sc=>{
+      let status=u.status||"Running";
+      sc.querySelectorAll("#uStat button").forEach(b=>b.onclick=()=>{status=b.dataset.s;sc.querySelectorAll("#uStat button").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+      setTimeout(()=>$("#uNum").focus(),50);
+      const del=$("#uDel");if(del){let armed=false;del.onclick=async()=>{if(!armed){armed=true;del.textContent="Tap again to remove";return}
+        del.disabled=true;try{await S.db.collection("units").doc(ex.id).delete();closeSheet();toast(`${ex.unit} removed. Its job history stays in reports.`)}catch(e){$("#uErr").textContent=errMsg(e);del.disabled=false}}}
+      $("#uSave").onclick=async()=>{
+        const num=$("#uNum").value.trim();if(!num){$("#uErr").textContent="Give the unit a number or name, like FL-07.";$("#uNum").focus();return}
+        if(S.units.some(x=>x.unit.toLowerCase()===num.toLowerCase()&&(!ex||x.id!==ex.id))){$("#uErr").textContent=`${num} is already in the fleet.`;return}
+        const data={unit:num,type:$("#uType").value,name:$("#uName").value.trim(),make:$("#uMake").value.trim(),model:$("#uModel").value.trim(),year:$("#uYear").value.trim(),
+          serial:$("#uSer").value.trim(),meterType:$("#uMT").value,meter:numv($("#uM").value)||null,pmMeter:numv($("#uPM").value)||null,pmDays:numv($("#uPD").value)||null,
+          status,notes:$("#uNotes").value.trim(),createdAt:ex?ex.createdAt:new Date().toISOString()};
+        const btn=$("#uSave");btn.disabled=true;btn.textContent="Saving…";
+        try{const col=S.db.collection("units");await (ex?col.doc(ex.id):col.doc()).set(data);closeSheet();toast(ex?"Unit updated":`${num} added`)}
+        catch(e){$("#uErr").textContent=errMsg(e);btn.disabled=false;btn.textContent=ex?"Save changes":"Add unit"}
+      };
+    });
+}
+
+/* ---------- Unit detail ---------- */
+function unitDetail(id){
+  const u=unitById(id);if(!u)return;
+  const rs=recsFor(id).sort((a,b)=>b.date.localeCompare(a.date));const y=today().slice(0,4);
+  const life=rs.reduce((s,r)=>s+total(r),0),ytd=rs.filter(r=>r.date.startsWith(y)).reduce((s,r)=>s+total(r),0),rep=rs.filter(r=>r.kind==="Repair").reduce((s,r)=>s+total(r),0);
+  const pm=pmStatus(u);const m=curMeter(u);
+  openSheet(`${h(u.unit)} · ${h(u.name||u.type||"")}`,`
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${statusPill(u.status)}${pm?`<span class="pill ${pm.level}">${h(pm.text)}</span>`:""}</div>
+    ${S.canWrite?`<div class="f"><span class="lbl">Set status</span><div class="seg" id="dStat">${["Running","Down","Out of service"].map(s=>`<button type="button" data-s="${s}" aria-pressed="${(u.status||"Running")===s}">${s}</button>`).join("")}</div></div>`:""}
+    <div class="split num" style="margin-top:0"><div class="i">Lifetime<b>${money0(life)}</b>${rs.length} jobs</div><div class="s">This year<b>${money0(ytd)}</b></div><div class="r">Repairs<b>${money0(rep)}</b>lifetime</div></div>
+    <dl class="dl">${[["Type",u.type],["Make / model",[u.make,u.model].filter(Boolean).join(" ")],["Year",u.year],["Serial",u.serial],["Meter",m?m.toLocaleString()+" "+meterUnit(u):""],["PM interval",[u.pmMeter?u.pmMeter+" "+meterUnit(u):"",u.pmDays?u.pmDays+" days":""].filter(Boolean).join(" or ")],["Notes",u.notes]].filter(x=>x[1]).map(([k,v])=>`<dt>${k}</dt><dd>${h(v)}</dd>`).join("")}</dl>
+    ${(()=>{const cs=checksFor(id).slice(0,6);if(!cs.length)return"";return`<div><span class="lbl">Daily checks</span></div><div class="rows">${cs.map(c=>`<div class="row" style="cursor:default">
+      <div class="d num"><b>${fmtShort(c.date)}</b>${h(fmtTime(c.at))}</div>
+      <div class="w"><div class="t">${h(c.driver||"Driver")}${c.shift?` · ${h(c.shift)} shift`:""}</div><div class="s">${c.hours?`<span class="num">${numv(c.hours).toLocaleString()} ${meterUnit(u)}</span>`:""}${c.defects?`<span>${h(String(c.defects).split("\n").length)} defect${String(c.defects).split("\n").length>1?"s":""}</span>`:""}</div></div>
+      <div class="c"><span class="pill ${c.result==="Pass"?"ok":c.result==="Defects"?"warn":"bad"}">${h(c.result)}</span></div></div>`).join("")}</div>`})()}
+    <div><span class="lbl">Work history</span></div>${rowsHtml(rs,false)}`,
+    `${S.canWrite?`<button class="btn small" id="dEdit" type="button">Edit unit</button>`:""}<span class="sp"></span>${S.canWrite?`<button class="btn primary" id="dLog" type="button">+ Work order on ${h(u.unit)}</button>`:`<button class="btn" data-close type="button">Close</button>`}`,
+    sc=>{
+      bindRows(sc);
+      const e=$("#dEdit");if(e)e.onclick=()=>unitForm(id);
+      const l=$("#dLog");if(l)l.onclick=()=>workForm({unitId:id});
+      sc.querySelectorAll("#dStat button").forEach(b=>b.onclick=async()=>{if(b.getAttribute("aria-pressed")==="true")return;
+        sc.querySelectorAll("#dStat button").forEach(x=>x.setAttribute("aria-pressed",x===b));
+        try{await S.db.collection("units").doc(id).update({status:b.dataset.s});toast(`${u.unit} marked ${b.dataset.s}`);setTimeout(()=>{if($("#scrim"))unitDetail(id)},50)}catch(err){toast(errMsg(err))}});
+    });
+}
+
+/* ---------- Render / tabs ---------- */
+function render(){
+  renderKpis();
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",t.dataset.tab===S.tab));
+  $("#logBtn").hidden=!S.canWrite;
+  if(S.tab==="fleet")renderFleet();else if(S.tab==="orders")renderOrders();else if(S.tab==="history")renderHistory();else renderReports();
+}
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{S.tab=t.dataset.tab;try{localStorage.setItem("fml-tab",S.tab)}catch(_){}render()});
+$("#logBtn").onclick=()=>workForm();
+try{const t=localStorage.getItem("fml-tab");if(t)S.tab=t}catch(_){}
+try{S.me=localStorage.getItem("fml-me")||""}catch(_){}
+function readHash(){const hs=(location.hash||"").slice(1);const m=/^wo-([A-Za-z0-9_-]{4,40})$/.exec(hs);
+  if(m){S.pendingWO=m[1];S.tab="orders"}else if(["fleet","orders","history","reports"].includes(hs))S.tab=hs}
+readHash();
+function openPendingWO(){if(!S.pendingWO||S.status!=="ready")return;const id=S.pendingWO;S.pendingWO=null;
+  try{history.replaceState(null,"",location.pathname+location.search)}catch(_){}
+  if(S.records.some(r=>r.id===id)){closeSheet();woDetail(id)}else toast("That work order wasn't found. It may have been deleted.")}
+window.addEventListener("hashchange",()=>{readHash();render();openPendingWO()});
+render();
+
+/* ---------- Data: Google Sheets via Apps Script ---------- */
+const SCRIPT_URL=(window.FLEET_SCRIPT_URL||"").trim();
+const CODE_KEY="fml-code";
+let code="";try{code=localStorage.getItem(CODE_KEY)||""}catch(_){}
+async function call(action,payload){
+  let res;
+  try{res=await fetch(SCRIPT_URL,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(Object.assign({action,code},payload||{}))})}
+  catch(_){throw{code:"unavailable"}}
+  let j;try{j=await res.json()}catch(_){throw{code:"unavailable"}}
+  if(!j.ok){if(j.error==="unauthorized"){askCode(true);throw{code:"unauthorized"}}throw{code:"server",message:j.error}}
+  return j;
+}
+const genId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const api={collection(name){return{doc(id){id=id||genId();return{id,
+  set:async d=>{await call("set",{collection:name,id,data:d});await load()},
+  update:async d=>{await call("update",{collection:name,id,data:d});await load()},
+  delete:async()=>{await call("delete",{collection:name,id});await load()}}}}}};
+async function load(){
+  if(!code)return;
+  try{const j=await call("list");S.units=j.units||[];S.records=j.records||[];S.employees=j.employees||[];S.checks=j.checks||[];S.status="ready";$("#banner").innerHTML="";render();openPendingWO()}
+  catch(e){if(e.code!=="unauthorized")$("#banner").innerHTML=`<div class="banner">Can't reach the fleet log right now. Check your signal; it will try again.</div>`}
+}
+function askCode(wrong){
+  openSheet("Enter shop code",`<p class="note" style="margin:0">Ask your maintenance lead for the shop code. You only enter it once on this phone.</p>
+    <div class="f"><label for="sc">Shop code</label><input type="text" id="sc" autocomplete="off" autocapitalize="off"></div><div class="err" role="alert">${wrong?"That code didn't work. Check it and try again.":""}</div>`,
+    `<span class="sp"></span><button class="btn primary" id="scGo" type="button">Continue</button>`,
+    ()=>{const i=$("#sc");setTimeout(()=>i.focus(),50);const go=()=>{const v=i.value.trim();if(!v)return;code=v;try{localStorage.setItem(CODE_KEY,v)}catch(_){}closeSheet();load()};
+      $("#scGo").onclick=go;i.onkeydown=e=>{if(e.key==="Enter")go()}});
+}
+if(!SCRIPT_URL||/^PASTE/i.test(SCRIPT_URL)){
+  S.canWrite=false;S.status="none";
+  $("#banner").innerHTML=`<div class="banner">Setup needed: paste your Google Apps Script web app URL into index.html (see README).</div>`;render();
+}else{
+  S.db=api;
+  S.dl={save:async({filename,data})=>{const type=/\.csv$/.test(filename)?"text/csv;charset=utf-8":"text/html;charset=utf-8";const url=URL.createObjectURL(data instanceof Blob?data:new Blob([data],{type}));
+    const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000)}};
+  if(code)load();else askCode(false);
+  const idle=()=>!document.hidden&&!$("#scrim")&&!(document.activeElement&&/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName));
+  setInterval(()=>{if(idle())load()},60000);
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden&&!$("#scrim"))load()});
+}
+})();
+</script>
+
+</body>
+</html>
