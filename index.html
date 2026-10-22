@@ -214,25 +214,29 @@ td.r,th.r{text-align:right}
 .prow .px:hover{color:var(--bad);background:var(--bad-soft)}
 .phead{display:grid;grid-template-columns:58px 1fr 92px 34px;gap:6px;padding:0 8px;font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 #printArea{display:none}
-@page{size:letter;margin:0}
+@page{size:letter;margin:12mm 13mm}
 @media print{
   body>*:not(#printArea){display:none!important}
-  #printArea{display:block!important;color:#000;background:#fff;font-family:Arial,Helvetica,sans-serif;font-size:12pt;padding:14mm 14mm 10mm}
+  #printArea{display:block!important;color:#000;background:#fff;font-family:Arial,Helvetica,sans-serif;font-size:12pt;padding:0}
   :root{padding:0!important}
   body{background:#fff!important}
 }
 .pwo h1{font-size:20pt;margin:0;letter-spacing:.02em;text-transform:uppercase}
 .pwo .hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #000;padding-bottom:6px;margin-bottom:10px}
 .pwo .won{font-size:22pt;font-weight:bold;font-family:"Courier New",monospace}
-.pwo table{width:100%;border-collapse:collapse;margin:6px 0 12px}
-.pwo td,.pwo th{border:1px solid #000;padding:6px 7px;text-align:left;vertical-align:top;font-size:11pt;white-space:normal}
+.pwo table{width:100%;border-collapse:collapse;margin:4px 0 8px}
+.pwo td,.pwo th{border:1px solid #000;padding:4px 6px;text-align:left;vertical-align:top;font-size:10.5pt;white-space:normal}
 .pwo th{background:#eee;font-size:9pt;text-transform:uppercase;letter-spacing:.04em;width:18%}
-.pwo h2{font-size:11pt;text-transform:uppercase;letter-spacing:.05em;margin:12px 0 4px}
-.pwo .box{border:1px solid #000;min-height:70px;padding:6px 7px;white-space:pre-wrap}
-.pwo .lines div{border-bottom:1px solid #000;height:26px}
-.pwo .sig{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:22px}
+.pwo h2{font-size:10.5pt;text-transform:uppercase;letter-spacing:.05em;margin:9px 0 3px}
+.pwo .box{border:1px solid #000;min-height:44px;padding:5px 6px;white-space:pre-wrap;font-size:10.5pt}
+.pwo .lines div{border-bottom:1px solid #000;height:24px}
+.pwo .sig{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:26px}
 .pwo .sig div{border-top:1px solid #000;padding-top:4px;font-size:9pt}
 .pwo .ft{margin-top:16px;font-size:8pt;color:#444}
+.pwo .keep{break-inside:avoid;page-break-inside:avoid}
+.pwo h2{break-after:avoid;page-break-after:avoid}
+.pwo tr,.pwo .box{break-inside:avoid;page-break-inside:avoid}
+.pwo .cost th.tot,.pwo .cost td.tot{font-size:13pt;font-weight:bold;background:#e4e4e4}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 <style>[hidden]{display:none!important}body{margin:0}:root{padding-top:env(safe-area-inset-top,0px)}</style>
@@ -241,7 +245,7 @@ td.r,th.r{text-align:right}
 
 <header class="band">
   <div class="band-in">
-    <div class="brand"><h1>Fleet Maintenance Log</h1><small>Repairs · Service · Cost · v3.3</small></div>
+    <div class="brand"><h1>Fleet Maintenance Log</h1><small>Repairs · Service · Cost · v3.4</small></div>
     <button class="btn primary log-btn" id="logBtn" type="button">+ Work order</button>
   </div>
 </header>
@@ -801,6 +805,7 @@ function woDetail(id,opt={}){
 function printWO(r){
   const u=unitById(r.unitId)||{};const e=h;
   const partRows=partsOf(r).slice(0,12);
+  const m2=v=>"$"+numv(v).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});const cell$=v=>numv(v)?m2(v):"";
   const blankRows=n=>Array.from({length:n},()=>`<tr><td>&nbsp;</td><td></td><td></td><td></td></tr>`).join("");
   $("#printArea").innerHTML=`<div class="pwo">
     <div class="hd"><div><h1>Work Order</h1><div>Fleet Maintenance Log</div></div><div class="won">${e(wo(r))}</div></div>
@@ -812,11 +817,14 @@ function printWO(r){
       <tr><th>Requested by</th><td>${e(r.requestedBy||"")}</td><th>Status</th><td>${e(stageLabel(r))}</td></tr>
     </table>
     <h2>Problem / work requested</h2><div class="box">${e(r.description||"")}</div>
-    <h2>Work performed</h2>${r.workDone?`<div class="box">${e(r.workDone)}</div>`:`<div class="lines">${"<div></div>".repeat(5)}</div>`}
-    <h2>Parts used</h2><table><tr><th style="width:10%">Qty</th><th style="width:22%">Part #</th><th>Description</th><th style="width:16%">Cost</th></tr>${partRows.map(p=>`<tr><td>${e(p.qty)}</td><td>${e(p.no)}</td><td>${e(p.desc)}</td><td>${String(p.cost).trim()?"$"+numv(p.cost).toFixed(2):""}</td></tr>`).join("")}${blankRows(Math.max(2,5-partRows.length))}${numv(r.partsCost)?`<tr><td colspan="3" style="text-align:right;font-weight:bold">Parts total</td><td><b>${money(numv(r.partsCost))}</b></td></tr>`:""}</table>
-    <table><tr><th>Labor hours</th><td>${e(r.laborHours||"")}</td><th>Labor rate</th><td>${numv(r.laborRate)?e(money(numv(r.laborRate)))+" / hr":""}</td></tr>
-      <tr><th>Labor cost</th><td>${numv(r.laborCost)?e(money(numv(r.laborCost))):""}</td><th>Meter at finish</th><td>${e(r.meter||"")} ${e(meterUnit(u))}</td></tr></table>
-    <div class="sig"><div>Technician signature &nbsp;/&nbsp; date</div><div>Supervisor sign-off &nbsp;/&nbsp; date</div></div>
+    <h2>Work performed</h2>${r.workDone?`<div class="box">${e(r.workDone)}</div>`:`<div class="lines">${"<div></div>".repeat(4)}</div>`}
+    <h2>Parts used</h2><table><tr><th style="width:10%">Qty</th><th style="width:22%">Part #</th><th>Description</th><th style="width:16%">Cost</th></tr>${partRows.map(p=>`<tr><td>${e(p.qty)}</td><td>${e(p.no)}</td><td>${e(p.desc)}</td><td>${String(p.cost).trim()?"$"+numv(p.cost).toFixed(2):""}</td></tr>`).join("")}${blankRows(partRows.length?Math.max(0,3-partRows.length):4)}${numv(r.partsCost)?`<tr><td colspan="3" style="text-align:right;font-weight:bold">Parts total</td><td><b>${m2(r.partsCost)}</b></td></tr>`:""}</table>
+    <div class="keep"><h2>Labor &amp; cost</h2><table class="cost">
+      <tr><th>Labor hours</th><td>${e(r.laborHours||"")}</td><th>Labor rate</th><td>${numv(r.laborRate)?m2(r.laborRate)+" / hr":""}</td></tr>
+      <tr><th>Meter at finish</th><td>${e(r.meter||"")} ${e(meterUnit(u))}</td><th>Vendor / tech</th><td>${e(r.vendor||"")}</td></tr>
+      <tr><th>Parts</th><td>${cell$(r.partsCost)}</td><th>Labor</th><td>${cell$(r.laborCost)}</td></tr>
+      <tr><th>Other</th><td>${cell$(r.otherCost)}</td><th class="tot">Total</th><td class="tot">${total(r)?m2(total(r)):""}</td></tr></table>
+    <div class="sig"><div>Technician signature &nbsp;/&nbsp; date</div><div>Supervisor sign-off &nbsp;/&nbsp; date</div></div></div>
     <div class="ft">Printed ${e(fmtDate(today()))} · ${e(woLink(r))}</div></div>`;
   setTimeout(()=>window.print(),50);
 }
