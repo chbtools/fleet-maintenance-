@@ -188,7 +188,7 @@ td.r,th.r{text-align:right}
 .pri{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:3px;white-space:nowrap}
 .pri.Urgent{background:var(--bad-soft);color:var(--bad)}.pri.High{background:var(--warn-soft);color:var(--warn)}.pri.Normal{background:var(--sunk);color:var(--muted)}.pri.Low{background:var(--sunk);color:var(--muted)}
 .stage{font-size:.74rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:99px;white-space:nowrap}
-.stage.open{background:var(--accent-soft);color:var(--accent)}.stage.in_progress{background:var(--ok-soft);color:var(--ok)}.stage.waiting{background:var(--warn-soft);color:var(--warn)}.stage.done{background:var(--sunk);color:var(--muted)}
+.stage.open{background:var(--accent-soft);color:var(--accent)}.stage.in_progress{background:var(--ok-soft);color:var(--ok)}.stage.waiting{background:var(--warn-soft);color:var(--warn)}.stage.done{background:var(--sunk);color:var(--muted)}.stage.approval,.stage.equipment{background:var(--warn-soft);color:var(--warn)}.stage.planning,.stage.scheduled{background:var(--sunk);color:var(--ink)}
 .wo-desc{font-size:1.05rem;line-height:1.45;margin:0;overflow-wrap:anywhere;white-space:pre-wrap}
 .actions{display:flex;flex-wrap:wrap;gap:8px}
 .actions .btn{flex:1 1 auto;justify-content:center;text-decoration:none;color:inherit}
@@ -197,6 +197,11 @@ td.r,th.r{text-align:right}
 .share-box.notify{border-color:var(--accent);background:var(--accent-soft)}
 .section-lbl{font-family:var(--display);font-size:1rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px;margin-top:2px}
 .seg.wrap4 button{font-size:.88rem;padding:8px 4px}
+.seg.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line)}
+.seg.grid button{border-left:0;line-height:1.2}
+.seg.grid button:last-child:nth-child(odd){grid-column:span 2}
+.seg.grid button:not([aria-pressed="true"]){background:var(--surface)}
+@media (max-width:480px){.seg.grid{grid-template-columns:1fr 1fr}}
 .team-row{display:flex;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
 .team-row:first-child{border-top:0}
 .team-row .nm{flex:1;min-width:0}
@@ -245,7 +250,7 @@ td.r,th.r{text-align:right}
 
 <header class="band">
   <div class="band-in">
-    <div class="brand"><h1>Fleet Maintenance Log</h1><small>Repairs · Service · Cost · v3.4</small></div>
+    <div class="brand"><h1>Fleet Maintenance Log</h1><small>Repairs · Service · Cost · v3.5</small></div>
     <button class="btn primary log-btn" id="logBtn" type="button">+ Work order</button>
   </div>
 </header>
@@ -316,9 +321,11 @@ const statusPill=s=>{s=s||"Running";const c=s==="Running"?"ok":s==="Down"?"bad":
 
 /* ---------- Work order helpers ---------- */
 const PRIS=["Low","Normal","High","Urgent"];
-const STAGES=[["open","Open"],["in_progress","In progress"],["waiting","Waiting on parts"]];
-const stageOf=r=>r.status==="open"?(r.stage&&r.stage!=="done"?r.stage:"open"):"done";
-const stageLabel=r=>({open:"Open",in_progress:"In progress",waiting:"Waiting on parts",done:"Completed"})[stageOf(r)]||"Open";
+const STAGES=[["open","Open"],["planning","Planning"],["scheduled","Scheduled"],["approval","Waiting on approval"],["waiting","Waiting on parts"],["equipment","Waiting on equipment"],["in_progress","In progress"]];
+const STAGE_BTN={approval:"Waiting approval",waiting:"Waiting parts",equipment:"Waiting equipment"};
+const stageName=k=>k==="done"?"Completed":((STAGES.find(x=>x[0]===k)||[,"Open"])[1]);
+const stageOf=r=>r.status==="open"?(r.stage&&r.stage!=="done"&&STAGES.some(x=>x[0]===r.stage)?r.stage:"open"):"done";
+const stageLabel=r=>stageName(stageOf(r));
 const empById=id=>S.employees.find(e=>e.id===id);
 const empName=r=>{const e=r.assignedTo&&empById(r.assignedTo);return e?e.name:(r.assignedTo?(r.assignedName||""):"")};
 const isOverdue=r=>r.status==="open"&&!!r.dueDate&&r.dueDate<today();
@@ -772,7 +779,7 @@ function woDetail(id,opt={}){
   openSheet(`${wo(r)} · ${h(unitLabel(r.unitId))}`,`
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="stage ${st}">${h(stageLabel(r))}</span>${r.priority&&r.priority!=="Normal"?`<span class="pri ${h(r.priority)}">${h(r.priority)} priority</span>`:""}${dueHtml(r)}</div>
     <p class="wo-desc">${h(r.description||"(no description)")}</p>
-    ${open&&cw?`<div class="f"><span class="lbl">Update status</span><div class="seg wrap4" id="dStage">${STAGES.map(([k,l])=>`<button type="button" data-s="${k}" aria-pressed="${st===k}">${k==="waiting"?"Waiting parts":l}</button>`).join("")}</div></div>
+    ${open&&cw?`<div class="f"><span class="lbl">Update status</span><div class="seg wrap4 grid" id="dStage">${STAGES.map(([k,l])=>`<button type="button" data-s="${k}" aria-pressed="${st===k}">${STAGE_BTN[k]||l}</button>`).join("")}</div></div>
       <div class="actions">${me&&r.assignedTo!==me?`<button class="btn" id="dMine" type="button">Assign to me</button>`:""}<button class="btn primary" id="dDone" type="button">Complete job…</button></div>`:""}
     <dl class="dl">${dl.map(([k,v])=>`<dt>${k}</dt><dd>${h(v)}</dd>`).join("")}</dl>
     <div class="share-box ${opt.notify?"notify":""}">
@@ -792,7 +799,7 @@ function woDetail(id,opt={}){
       sc.querySelectorAll("#dStage button").forEach(b=>b.onclick=()=>{if(b.getAttribute("aria-pressed")==="true")return;
         sc.querySelectorAll("#dStage button").forEach(x=>x.setAttribute("aria-pressed",x===b));
         const k=b.dataset.s,extra=k==="in_progress"&&!r.assignedTo&&me?{assignedTo:me,assignedName:empById(me).name}:{};
-        upd(Object.assign({stage:k},extra),`${wo(r)} marked ${k==="waiting"?"waiting on parts":k==="in_progress"?"in progress":"open"}`)});
+        upd(Object.assign({stage:k},extra),`${wo(r)} marked ${stageName(k).toLowerCase()}`)});
       const dm=$("#dMine");if(dm)dm.onclick=()=>upd({assignedTo:me,assignedName:empById(me).name},`${wo(r)} assigned to you`);
       const dd=$("#dDone");if(dd)dd.onclick=()=>workForm({recId:r.id,complete:true});
       const de=$("#dEdit");if(de)de.onclick=()=>workForm({recId:r.id});
@@ -884,7 +891,7 @@ function workForm({recId,unitId,complete}={}){
   const rate0=numv(r.laborRate)?r.laborRate:(numv(r.laborCost)?"":lastRate);
   const ro=!S.canWrite,dis=ro?"disabled":"";
   const emps=sortedEmps();
-  const STG=[["open","Open"],["in_progress","In progress"],["waiting","Waiting parts"],["done","Completed"]];
+  const STG=STAGES.map(([k,l])=>[k,STAGE_BTN[k]||l]).concat([["done","Completed"]]);
   openSheet(ex?(complete?`Complete ${wo(ex)}`:`Edit ${wo(ex)}`)+` · ${h(unitLabel(ex.unitId))}`:"New work order",`
     <div class="f"><label for="wUnit">Unit</label><select id="wUnit" ${dis}><option value="">Choose a unit…</option>${sortedUnits().map(u=>`<option value="${h(u.id)}" ${r.unitId===u.id?"selected":""}>${h(u.unit)} — ${h(u.name||u.type||"")}</option>`).join("")}</select></div>
     <div class="f"><span class="lbl">Type of work</span><div class="seg" id="wKind">${KINDS.map(k=>`<button type="button" aria-pressed="${k===kind}" data-k="${k}" ${dis}>${k}</button>`).join("")}</div></div>
@@ -893,7 +900,7 @@ function workForm({recId,unitId,complete}={}){
       <div class="f"><label for="wPri">Priority</label><select id="wPri" ${dis}>${PRIS.map(p=>`<option ${pri===p?"selected":""}>${p}</option>`).join("")}</select></div></div>
     <div class="g2"><div class="f"><label for="wDue">Due date</label><input type="date" id="wDue" value="${h(r.dueDate||"")}" ${dis}></div>
       <div class="f"><label for="wReq">Requested by</label><input type="text" id="wReq" value="${h(r.requestedBy||"")}" placeholder="Who reported it" ${dis}></div></div>
-    <div class="f"><span class="lbl">Status</span><div class="seg wrap4" id="wStat">${STG.map(([k,l])=>`<button type="button" data-s="${k}" aria-pressed="${st===k}" ${dis}>${l}</button>`).join("")}</div></div>
+    <div class="f"><span class="lbl">Status</span><div class="seg wrap4 grid" id="wStat">${STG.map(([k,l])=>`<button type="button" data-s="${k}" aria-pressed="${st===k}" ${dis}>${l}</button>`).join("")}</div></div>
     <div class="section-lbl">Work done &amp; cost <span class="hint" style="text-transform:none;letter-spacing:0;font-family:var(--body)">· fill in when the job is finished</span></div>
     <div class="f"><label for="wDone">Work performed</label><textarea id="wDone" placeholder="e.g. Replaced hose on tilt cylinder, topped off hydraulic fluid, tested" ${dis}>${h(r.workDone||"")}</textarea></div>
     <div class="g2"><div class="f"><label for="wDate" id="wDateL">${st==="done"?"Date completed":"Date opened"}</label><input type="date" id="wDate" value="${h(date0)}" ${dis}></div>
