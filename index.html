@@ -60,13 +60,12 @@ button,input,select,textarea{font:inherit;color:inherit}
 
 /* kpis */
 .wrap{max-width:1080px;margin:0 auto;padding-inline:16px;padding-block:16px 48px}
-.kpis{display:grid;grid-template-columns:repeat(5,1fr);border:1px solid var(--line);border-radius:var(--r);background:var(--surface);overflow:hidden}
-.kpi{padding:12px 14px;border-left:1px solid var(--line);min-width:0}
-.kpi:first-child{border-left:0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.kpi{padding:12px 14px;min-width:0;background:var(--surface)}
 .kpi .lab{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
 .kpi .val{font-family:var(--display);font-weight:600;font-size:1.75rem;line-height:1.1;font-variant-numeric:tabular-nums}
 .kpi .val.bad{color:var(--bad)} .kpi .val.warn{color:var(--warn)}
-@media (max-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}.kpi{border-left:0;border-top:1px solid var(--line)}.kpi:nth-child(-n+2){border-top:0}.kpi:nth-child(even){border-left:1px solid var(--line)}.kpi:last-child{grid-column:1/-1}}
+@media (max-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}.kpi:last-child:nth-child(odd){grid-column:1/-1}}
 
 /* tabs */
 .tabs{display:flex;gap:4px;margin:20px 0 14px;border-bottom:2px solid var(--line)}
@@ -101,7 +100,7 @@ textarea{min-height:76px;resize:vertical}
 .row .d{font-size:.84rem;color:var(--muted)}
 .row .d b{display:block;color:var(--ink);font-weight:600}
 .row .w{min-width:0}
-.row .w .t{font-weight:500;overflow-wrap:anywhere}
+.row .w .t{font-weight:500;overflow-wrap:anywhere;white-space:pre-line}
 .row .w .s{font-size:.82rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 10px;margin-top:3px;align-items:center}
 .row .c{font-weight:600;text-align:right;white-space:nowrap}
 .kind{font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;padding:1px 6px;border-radius:3px;border:1px solid currentColor}
@@ -179,7 +178,7 @@ td.r,th.r{text-align:right}
 .wo[data-pri="High"]{box-shadow:inset 4px 0 0 var(--warn)}
 .wo-top{display:flex;gap:8px;align-items:flex-start}
 .wo-top .tag{font-size:1rem}
-.wo-title{flex:1;min-width:0;font-weight:500;line-height:1.3;overflow-wrap:anywhere}
+.wo-title{flex:1;min-width:0;font-weight:500;line-height:1.3;overflow-wrap:anywhere;white-space:pre-line}
 .wo-meta{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;font-size:.82rem;color:var(--muted)}
 .who{display:inline-flex;align-items:center;gap:6px;color:var(--ink);font-weight:500}
 .av{width:22px;height:22px;border-radius:50%;background:var(--steel);color:var(--on-steel);font-size:.66rem;font-weight:700;display:inline-grid;place-items:center;letter-spacing:.02em}
@@ -188,7 +187,26 @@ td.r,th.r{text-align:right}
 .pri{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:3px;white-space:nowrap}
 .pri.Urgent{background:var(--bad-soft);color:var(--bad)}.pri.High{background:var(--warn-soft);color:var(--warn)}.pri.Normal{background:var(--sunk);color:var(--muted)}.pri.Low{background:var(--sunk);color:var(--muted)}
 .stage{font-size:.74rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:2px 8px;border-radius:99px;white-space:nowrap}
-.stage.open{background:var(--accent-soft);color:var(--accent)}.stage.in_progress{background:var(--ok-soft);color:var(--ok)}.stage.waiting{background:var(--warn-soft);color:var(--warn)}.stage.done{background:var(--sunk);color:var(--muted)}.stage.approval,.stage.equipment{background:var(--warn-soft);color:var(--warn)}.stage.planning,.stage.scheduled{background:var(--sunk);color:var(--ink)}
+.stage.open{background:var(--accent-soft);color:var(--accent)}.stage.in_progress{background:var(--ok-soft);color:var(--ok)}.stage.waiting{background:var(--warn-soft);color:var(--warn)}.stage.done{background:var(--sunk);color:var(--muted)}.stage.approval,.stage.equipment{background:var(--warn-soft);color:var(--warn)}.stage.planning,.stage.scheduled{background:var(--sunk);color:var(--ink)}.stage.rejected{background:var(--bad-soft);color:var(--bad)}
+.thumbs{display:flex;flex-wrap:wrap;gap:8px}
+.thumbs a{display:block;width:76px;height:76px;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;background:var(--sunk);position:relative}
+.thumbs img{width:100%;height:100%;object-fit:cover;display:block}
+.thumbs a.broken img{display:none}
+.thumbs a.broken::after{content:"Open photo";position:absolute;inset:0;display:grid;place-items:center;padding:6px;font-size:.72rem;text-align:center;color:var(--ink)}
+.thumbx{position:relative}
+.thumbx .px{position:absolute;top:-6px;right:-6px;width:26px;height:26px;border-radius:50%;border:1px solid var(--line);background:var(--surface);color:var(--muted);cursor:pointer}
+.passfail{display:flex;border:1px solid var(--line);border-radius:var(--r);overflow:hidden;flex:0 0 auto}
+.passfail button{border:0;background:var(--surface);min-height:42px;padding:8px 12px;cursor:pointer;font-weight:600}
+.passfail button+button{border-left:1px solid var(--line)}
+.passfail button[data-r="pass"][aria-pressed="true"]{background:var(--ok);color:#fff}
+.passfail button[data-r="fail"][aria-pressed="true"]{background:var(--bad);color:#fff}
+.passfail button[data-r="na"][aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.check-item{display:flex;gap:8px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.check-item .nm{flex:1;min-width:0;font-weight:500}
+.level-card{border:1px solid var(--line);border-radius:var(--r);background:var(--surface);padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.task-line{display:flex;gap:8px;align-items:flex-start;padding-top:6px;border-top:1px dashed var(--line)}
+.task-line .nm{flex:1;min-width:0}
+.check-on{display:flex;gap:8px;align-items:center;font-weight:500}
 .wo-desc{font-size:1.05rem;line-height:1.45;margin:0;overflow-wrap:anywhere;white-space:pre-wrap}
 .actions{display:flex;flex-wrap:wrap;gap:8px}
 .actions .btn{flex:1 1 auto;justify-content:center;text-decoration:none;color:inherit}
@@ -250,7 +268,7 @@ td.r,th.r{text-align:right}
 
 <header class="band">
   <div class="band-in">
-    <div class="brand"><h1>Fleet Maintenance Log</h1><small>Repairs · Service · Cost · v3.5</small></div>
+    <div class="brand"><h1>Fleet Maintenance Log</h1><small>Repairs · Service · Cost · v3.6</small></div>
     <button class="btn primary log-btn" id="logBtn" type="button">+ Work order</button>
   </div>
 </header>
@@ -274,7 +292,8 @@ td.r,th.r{text-align:right}
 (function(){
 const TYPES=["Forklift","Air compressor","Truck","Trailer","Loader / skid steer","Generator","Crane / hoist","Mower","Other"];
 const KINDS=["Repair","Service","Inspection"];
-const S={units:[],records:[],employees:[],checks:[],me:"",pendingWO:null,wo:{view:"open"},tab:"fleet",canWrite:true,db:null,dl:null,loaded:{u:false,r:false},status:"loading",
+const PREFS={id:"prefs",digestOn:"no",dateSoonDays:30,recipients:"[]",includeSms:"no",appUrl:""};
+const S={units:[],records:[],employees:[],checks:[],levels:[],pmTasks:[],checklists:[],settings:Object.assign({},PREFS),me:"",pendingWO:null,wo:{view:"open"},tab:"fleet",canWrite:true,db:null,dl:null,loaded:{u:false,r:false},status:"loading",sample:false,
   hist:{q:"",unit:"all",kind:"all"},rep:{range:"ytd",unit:"all",from:"",to:""}};
 
 /* ---------- helpers ---------- */
@@ -288,7 +307,12 @@ const iso=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
 const today=()=>iso(new Date());
 const fmtDate=s=>{if(!s)return"";const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})};
 const fmtShort=s=>{if(!s)return"";const [y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d).toLocaleDateString("en-US",{month:"short",day:"numeric"})};
-const daysBetween=(a,b)=>{const p=s=>{const[y,m,d]=s.split("-").map(Number);return Date.UTC(y,m-1,d)};return Math.round((p(b)-p(a))/864e5)};
+const daysBetween=(a,b)=>{const p=s=>{const[y,m,d]=String(s).split("-").map(Number);return Date.UTC(y,m-1,d)};return Math.round((p(b)-p(a))/864e5)};
+const addDays=(iso,n)=>{const[y,m,d]=String(iso).split("-").map(Number);const dt=new Date(Date.UTC(y,m-1,d));dt.setUTCDate(dt.getUTCDate()+n);return dt.toISOString().slice(0,10)};
+const startOfWeek=iso=>{const[y,m,d]=String(iso).split("-").map(Number);const day=new Date(Date.UTC(y,m-1,d)).getUTCDay();return addDays(iso,day===0?-6:1-day)};
+const parseJson=(s,fallback)=>{if(Array.isArray(s)||(s&&typeof s==="object"))return s;try{const v=JSON.parse(s||"");return v==null?fallback:v}catch(_){return fallback}};
+const isYes=v=>v!=="no"&&v!==false&&v!=="false"&&v!==0&&v!=="0";
+const fmtHrs=n=>{const x=Math.round(numv(n)*10)/10;return x.toLocaleString(undefined,{maximumFractionDigits:1})};
 const total=r=>numv(r.partsCost)+numv(r.laborCost)+numv(r.otherCost);
 const wo=r=>"WO-"+String(r.id||"").replace(/[^a-z0-9]/gi,"").slice(-5).toUpperCase();
 const unitById=id=>S.units.find(u=>u.id===id);
@@ -301,11 +325,11 @@ function sortedUnits(){return S.units.slice().sort((a,b)=>String(a.unit).localeC
 function recsFor(id){return S.records.filter(r=>r.unitId===id)}
 function curMeter(u){let m=numv(u.meter);for(const r of recsFor(u.id))if(numv(r.meter)>m)m=numv(r.meter);return m}
 
-/* PM status from last Service record */
-function pmStatus(u){
+/* Old single-interval PM, used until a unit has PM levels. */
+function legacyPmStatus(u){
   const hrs=numv(u.pmMeter),days=numv(u.pmDays);
   if(!hrs&&!days)return null;
-  const svc=recsFor(u.id).filter(r=>r.kind==="Service"&&r.status!=="open").sort((a,b)=>b.date.localeCompare(a.date))[0];
+  const svc=recsFor(u.id).filter(r=>r.kind==="Service"&&r.status!=="open"&&r.stage!=="rejected").sort((a,b)=>b.date.localeCompare(a.date))[0];
   if(!svc)return{level:"warn",text:"No PM logged yet"};
   let level="ok",parts=[];
   if(hrs){const since=curMeter(u)-numv(svc.meter);const left=hrs-since;
@@ -316,6 +340,131 @@ function pmStatus(u){
     else{if(left<=Math.max(7,days*.1)&&level!=="bad")level="warn";parts.push(left+" days left")}}
   return{level,text:(level==="bad"?"PM overdue · ":level==="warn"?"PM due soon · ":"PM ok · ")+parts.join(", ")};
 }
+/* Same due / soon / overdue rules as Code.gs pmTaskInfo. */
+function warnDays(every){every=numv(every);if(every<=1)return 0;if(every<=7)return 1;return Math.max(2,Math.round(every*0.1))}
+function pmTaskInfo(unit,level,task){
+  const off=summary=>({status:"off",summary,suggested:"",openWoId:""});
+  if(!task||!isYes(task.active))return off("Paused");
+  if(!level)return off("This task needs a PM level.");
+  if(!isYes(level.active))return off("This level is paused.");
+  const open=S.records.find(r=>r.pmTaskId===task.id&&r.status==="open");
+  const day=today();
+  let status="ok",reasons=[],suggested="";
+  const rank={ok:0,soon:1,due:2,overdue:3};
+  const worse=(a,b)=>rank[a]>=rank[b]?a:b;
+  const consider=iso=>{if(iso&&(!suggested||iso<suggested))suggested=iso};
+  const basis=level.basis;
+  if(basis==="calendar"||basis==="both"){
+    const every=numv(level.everyDays);
+    if(every>0){
+      if(!task.lastCompletedAt){status=worse(status,"due");reasons.push("no PM logged yet");consider(day)}
+      else{
+        const due=addDays(String(task.lastCompletedAt).slice(0,10),every);
+        const left=daysBetween(day,due);
+        consider(due);
+        if(left<0){status=worse(status,"overdue");reasons.push(Math.abs(left)+" day"+(left===-1?"":"s")+" over")}
+        else if(left===0){status=worse(status,"due");reasons.push("due today")}
+        else if(left<=warnDays(every)){status=worse(status,"soon");reasons.push(left+" day"+(left===1?"":"s")+" left")}
+        else reasons.push(left+" days left");
+      }
+    }
+  }
+  const metered=unit&&unit.meterType!=="None";
+  if((basis==="meter"||basis==="both")&&metered){
+    const everyM=numv(level.everyMeter),word=meterUnit(unit)||"hrs";
+    if(everyM>0){
+      const hasLast=!(task.lastMeter===""||task.lastMeter==null)&&isFinite(Number(task.lastMeter));
+      if(!hasLast){status=worse(status,"due");reasons.push("no meter at last PM");consider(day)}
+      else{
+        const leftM=Number(task.lastMeter)+everyM-curMeter(unit);
+        if(leftM<=0){status=worse(status,"overdue");reasons.push(Math.abs(Math.round(leftM))+" "+word+" over");consider(day)}
+        else{if(leftM<=Math.max(1,everyM*0.1))status=worse(status,"soon");reasons.push(Math.round(leftM)+" "+word+" left")}
+      }
+    }
+  }
+  if(basis==="meter"&&unit&&unit.meterType==="None"){status=worse(status,"due");reasons.push("unit has no meter")}
+  const label=status==="overdue"?"Overdue":status==="due"?"Due now":status==="soon"?"Due soon":"OK";
+  let summary=[label].concat(reasons).join(" · ");
+  if(open)summary+=" · work order already open";
+  return{status,summary,suggested,openWoId:open?open.id:""};
+}
+function intervalLabel(level,u){
+  if(!level)return"";
+  const d=numv(level.everyDays),m=numv(level.everyMeter),w=meterUnit(u)||"hrs";
+  if(level.basis==="both")return"every "+d+" days or "+m+" "+w+", whichever comes first";
+  if(level.basis==="meter")return"every "+m+" "+w;
+  return"every "+d+" day"+(d===1?"":"s");
+}
+function levelsFor(id){return S.levels.filter(l=>l.unitId===id)}
+function tasksForUnit(id){return S.pmTasks.filter(t=>t.unitId===id)}
+function pmStatus(u){
+  const levels=levelsFor(u.id);
+  if(!levels.length)return legacyPmStatus(u);
+  const rank={off:-1,ok:0,soon:1,due:2,overdue:3};
+  let worst="off";const bits=[];
+  for(const t of tasksForUnit(u.id)){
+    const level=S.levels.find(l=>l.id===t.levelId);
+    const info=pmTaskInfo(u,level,t);
+    if(rank[info.status]>rank[worst])worst=info.status;
+    if(info.status==="soon"||info.status==="due"||info.status==="overdue"){
+      const name=levels.length>1&&level?level.name+": ":"";
+      bits.push(name+info.summary.replace(/^(Overdue|Due now|Due soon|OK) · /,""));
+    }
+  }
+  if(worst==="off")return{level:"ok",text:"PM schedule · "+levels.length+" level"+(levels.length>1?"s":"")};
+  const pill=worst==="overdue"?"bad":worst==="ok"?"ok":"warn";
+  const head=worst==="overdue"?"PM overdue":worst==="due"?"PM due":worst==="soon"?"PM due soon":"PM ok";
+  return{level:pill,text:bits.length?head+" · "+bits.slice(0,2).join(", "):head};
+}
+function duePmTasks(unitId){
+  return S.pmTasks.filter(t=>{
+    if(unitId&&t.unitId!==unitId)return false;
+    const u=unitById(t.unitId),level=S.levels.find(l=>l.id===t.levelId);
+    const info=pmTaskInfo(u,level,t);
+    return(info.status==="due"||info.status==="overdue")&&!info.openWoId;
+  });
+}
+function dateItems(u){
+  const soon=numv(S.settings.dateSoonDays)||30;
+  const fields=[["warrantyExpires","Warranty"],["certExpires","Certification"],["registrationExpires","Registration"]];
+  const items=[];
+  for(const[k,label]of fields){
+    const d=String(u[k]||"").slice(0,10);
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(d))continue;
+    const left=daysBetween(today(),d);
+    let level="ok",text="good through "+fmtShort(d);
+    if(left<0){level="bad";text="overdue · "+(-left)+" day"+(left===-1?"":"s")}
+    else if(left<=soon){level="warn";text=left===0?"due today":"due in "+left+" day"+(left===1?"":"s")}
+    items.push({k,label,level,text,date:d});
+  }
+  const worst=items.some(i=>i.level==="bad")?"bad":items.some(i=>i.level==="warn")?"warn":items.length?"ok":null;
+  return{level:worst,items};
+}
+function hoursDown(from,to){
+  let h=0;
+  for(const r of S.records){const d=String(r.date||"").slice(0,10);if(d&&d>=from&&d<=to)h+=numv(r.downtimeHours)}
+  return Math.round(h*10)/10;
+}
+function photosOf(raw){const a=parseJson(raw,[]);return Array.isArray(a)?a.filter(p=>p&&(p.thumb||p.url)):[]}
+function thumbsHtml(list){
+  if(!list||!list.length)return"";
+  return`<div class="thumbs">${list.map(p=>`<a href="${h(p.url||p.thumb)}" target="_blank" rel="noopener"><img src="${h(p.thumb||p.url)}" alt="${h(p.name||"Photo")}" onerror="this.parentNode.classList.add('broken')"></a>`).join("")}</div>`;
+}
+function legacyOnly(u){
+  if(!u||!u.id)return true;
+  const ls=levelsFor(u.id);
+  return !ls.length||(ls.length===1&&isYes(ls[0].legacy));
+}
+function pmScheduleText(u){
+  const levels=levelsFor(u.id).filter(l=>isYes(l.active));
+  if(!levels.length){
+    const bits=[];
+    if(numv(u.pmMeter))bits.push(u.pmMeter+" "+(meterUnit(u)||"hrs"));
+    if(numv(u.pmDays))bits.push(u.pmDays+" days");
+    return bits.join(" or ");
+  }
+  return levels.map(l=>l.name+" ("+intervalLabel(l,u)+")").join("; ");
+}
 const statusPill=s=>{s=s||"Running";const c=s==="Running"?"ok":s==="Down"?"bad":"idle";return`<span class="pill ${c}">${h(s)}</span>`};
 
 
@@ -323,10 +472,12 @@ const statusPill=s=>{s=s||"Running";const c=s==="Running"?"ok":s==="Down"?"bad":
 const PRIS=["Low","Normal","High","Urgent"];
 const STAGES=[["open","Open"],["planning","Planning"],["scheduled","Scheduled"],["approval","Waiting on approval"],["waiting","Waiting on parts"],["equipment","Waiting on equipment"],["in_progress","In progress"]];
 const STAGE_BTN={approval:"Waiting approval",waiting:"Waiting parts",equipment:"Waiting equipment"};
-const stageName=k=>k==="done"?"Completed":((STAGES.find(x=>x[0]===k)||[,"Open"])[1]);
-const stageOf=r=>r.status==="open"?(r.stage&&r.stage!=="done"&&STAGES.some(x=>x[0]===r.stage)?r.stage:"open"):"done";
+const stageName=k=>k==="done"?"Completed":k==="rejected"?"Rejected":((STAGES.find(x=>x[0]===k)||[,"Open"])[1]);
+const stageOf=r=>r.stage==="rejected"?"rejected":r.status==="open"?(r.stage&&r.stage!=="done"&&STAGES.some(x=>x[0]===r.stage)?r.stage:"open"):"done";
 const stageLabel=r=>stageName(stageOf(r));
 const empById=id=>S.employees.find(e=>e.id===id);
+const empByName=name=>{const n=String(name||"").trim().toLowerCase();return n?S.employees.find(e=>String(e.name||"").trim().toLowerCase()===n)||null:null};
+const meName=()=>{const e=S.me&&empById(S.me);return e?e.name:""};
 const empName=r=>{const e=r.assignedTo&&empById(r.assignedTo);return e?e.name:(r.assignedTo?(r.assignedName||""):"")};
 const isOverdue=r=>r.status==="open"&&!!r.dueDate&&r.dueDate<today();
 const priRank=p=>({Urgent:0,High:1,Normal:2,Low:3})[p||"Normal"]??2;
@@ -352,6 +503,12 @@ function woMessage(r){
     n?`Assigned to: ${n}`:"",r.dueDate?`Due: ${fmtDate(r.dueDate)}`:"",
     `Open it: ${woLink(r)}`].filter(Boolean).join("\n");
 }
+function decisionMessage(r){
+  const base=woMessage(r);
+  if(r.approvalDecision==="approved")return`Approved by ${r.approvalBy||"the shop"}${r.approvalNote?"\nNote: "+r.approvalNote:""}\n\n`+base;
+  if(r.approvalDecision==="rejected")return`Rejected by ${r.approvalBy||"the shop"}${r.approvalNote?"\nNote: "+r.approvalNote:""}\n\n`+base;
+  return base;
+}
 
 /* ---------- KPIs ---------- */
 function renderKpis(){
@@ -359,10 +516,15 @@ function renderKpis(){
   let ytd=0,mo=0;for(const r of S.records){if(r.date&&r.date.startsWith(y))ytd+=total(r);if(r.date&&r.date.startsWith(m))mo+=total(r)}
   const down=S.units.filter(u=>u.status==="Down").length;
   const pmDue=S.units.filter(u=>{const p=pmStatus(u);return p&&p.level!=="ok"}).length;
+  const datesDue=S.units.filter(u=>{const d=dateItems(u);return d.level==="bad"||d.level==="warn"}).length;
   const open=S.records.filter(r=>r.status==="open").length,late=S.records.filter(isOverdue).length;
+  const downHrs=hoursDown(startOfWeek(t),t);
   $("#kpis").innerHTML=[
     ["Units",S.units.length,""],["Down",down,down?"bad":""],["PM due / overdue",pmDue,pmDue?"warn":""],
-    ["Open work orders",late?`${open} · ${late} late`:open,late?"bad":open?"warn":""],["Spent this month · YTD",`${money0(mo)} · ${money0(ytd)}`,""]
+    ["Dates due",datesDue,datesDue?"warn":""],
+    ["Open work orders",late?`${open} · ${late} late`:open,late?"bad":open?"warn":""],
+    ["Hours down this week",fmtHrs(downHrs),downHrs?"warn":""],
+    ["Spent this month · YTD",`${money0(mo)} · ${money0(ytd)}`,""]
   ].map(([l,v,c])=>`<div class="kpi"><div class="lab">${l}</div><div class="val ${c}">${h(v)}</div></div>`).join("");
 }
 
@@ -374,19 +536,22 @@ function renderFleet(){
     v.innerHTML=`<div class="empty"><h3>No equipment yet</h3><p>Add each forklift, compressor, truck or machine once. Then log repairs and service against it in a few taps.</p>${S.canWrite?`<button class="btn primary" id="addFirst" type="button">+ Add first unit</button>`:""}</div>`;
     const b=$("#addFirst");if(b)b.onclick=()=>unitForm();return}
   const t=today(),y=t.slice(0,4);
-  v.innerHTML=`<div class="toolbar"><div class="grow note">${S.units.length} unit${S.units.length>1?"s":""} · tap a unit for its full history</div><button class="btn" id="xlFleet" type="button">Excel</button>${S.canWrite?`<button class="btn" id="addUnit" type="button">+ Add unit</button>`:""}</div>
+  const dueN=duePmTasks().length;
+  v.innerHTML=`<div class="toolbar"><div class="grow note">${S.units.length} unit${S.units.length>1?"s":""} · tap a unit for its full history</div>${S.canWrite?`<button class="btn" id="genPm" type="button">Generate due PMs${dueN?` (${dueN})`:""}</button>`:""}<button class="btn" id="xlFleet" type="button">Excel</button>${S.canWrite?`<button class="btn" id="addUnit" type="button">+ Add unit</button>`:""}</div>
   <div class="units">${sortedUnits().map(u=>{
     const rs=recsFor(u.id).sort((a,b)=>b.date.localeCompare(a.date));const last=rs[0];
     const ytd=rs.filter(r=>r.date.startsWith(y)).reduce((s,r)=>s+total(r),0);
     const pm=pmStatus(u);const m=curMeter(u);
     return`<button class="unit" type="button" data-unit="${h(u.id)}">
       <div class="unit-top"><span class="tag">${h(u.unit)}</span><div class="unit-name">${h(u.name||u.type||"")}<small>${h([u.make,u.model,u.year].filter(Boolean).join(" "))}</small></div>${statusPill(u.status)}</div>
-      ${pm?`<div class="pm"><span class="pill ${pm.level}">${pm.level==="ok"?"PM":"PM"}</span><span>${h(pm.text.replace(/^PM [a-z ]+· /,""))}</span></div>`:""}
+      ${pm?`<div class="pm"><span class="pill ${pm.level}">PM</span><span>${h(pm.text.replace(/^PM [a-z ]+· /,""))}</span></div>`:""}
+      ${dateItems(u).items.filter(i=>i.level!=="ok").map(i=>`<div class="pm"><span class="pill ${i.level}">${h(i.label)}</span><span>${h(i.text)}</span></div>`).join("")}
       ${(()=>{const cs=checksFor(u.id);if(!cs.length)return"";const c=cs[0],td=c.date===t;
         return`<div class="pm"><span class="pill ${!td?"warn":c.result==="Pass"?"ok":"bad"}">Daily check</span><span>${td?`${h(c.result)} · ${h(fmtTime(c.at))}${c.driver?" · "+h(c.driver):""}`:`None today · last ${h(fmtShort(c.date))}`}</span></div>`})()}
       <div class="unit-meta num"><span>${m?`<b>${m.toLocaleString()}</b> ${meterUnit(u)}`:"No meter"}</span><span>Last: <b>${last?fmtShort(last.date):"—"}</b></span><span>YTD <b>${money0(ytd)}</b></span></div>
     </button>`}).join("")}</div>`;
   const a=$("#addUnit");if(a)a.onclick=()=>unitForm();
+  const g=$("#genPm");if(g)g.onclick=()=>generateDueSheet();
   $("#xlFleet").onclick=e=>exportExcel(e.currentTarget);
   v.querySelectorAll("[data-unit]").forEach(b=>b.onclick=()=>unitDetail(b.dataset.unit));
 }
@@ -397,7 +562,7 @@ function rowsHtml(list,showUnit=true){
   return`<div class="rows">${list.map(r=>`<button class="row" type="button" data-rec="${h(r.id)}">
     <div class="d num"><b>${fmtShort(r.date)}</b>${r.date?r.date.slice(0,4):""}</div>
     <div class="w"><div class="t">${showUnit?`<span class="tag" style="font-size:.95rem;margin-right:6px">${h(unitLabel(r.unitId))}</span>`:""}${h(r.description||"(no description)")}</div>
-      <div class="s"><span class="kind ${h(r.kind)}">${h(r.kind)}</span>${r.status==="open"?`<span class="open-flag">${h(stageLabel(r))}</span>`:""}${empName(r)?`<span>${h(empName(r))}</span>`:""}<span class="mono">${wo(r)}</span>${r.meter?`<span class="num">@ ${numv(r.meter).toLocaleString()} ${meterUnit(unitById(r.unitId))}</span>`:""}${r.vendor?`<span>${h(r.vendor)}</span>`:""}</div></div>
+      <div class="s"><span class="kind ${h(r.kind)}">${h(r.kind)}</span>${r.status==="open"||r.stage==="rejected"?`<span class="open-flag">${h(stageLabel(r))}</span>`:""}${empName(r)?`<span>${h(empName(r))}</span>`:""}<span class="mono">${wo(r)}</span>${r.meter?`<span class="num">@ ${numv(r.meter).toLocaleString()} ${meterUnit(unitById(r.unitId))}</span>`:""}${numv(r.downtimeHours)?`<span class="num">${fmtHrs(r.downtimeHours)} hrs down</span>`:""}${photosOf(r.photos).length?`<span>${photosOf(r.photos).length} photo${photosOf(r.photos).length>1?"s":""}</span>`:""}${r.vendor?`<span>${h(r.vendor)}</span>`:""}</div></div>
     <div class="c num">${money(total(r))}</div></button>`).join("")}</div>`;
 }
 function bindRows(root){root.querySelectorAll("[data-rec]").forEach(b=>b.onclick=()=>woDetail(b.dataset.rec))}
@@ -437,11 +602,11 @@ function rangeDates(){
 function reportData(){
   const[from,to,label]=rangeDates();const r=S.rep;
   const list=S.records.filter(x=>x.date>=from&&x.date<=to&&(r.unit==="all"||x.unitId===r.unit)).sort((a,b)=>a.date.localeCompare(b.date));
-  const by={Repair:[0,0],Service:[0,0],Inspection:[0,0]};let parts=0,labor=0,other=0,hrs=0;
+  const by={Repair:[0,0],Service:[0,0],Inspection:[0,0]};let parts=0,labor=0,other=0,hrs=0,down=0;
   const perUnit={};const perMonth={};
   for(const x of list){const t=total(x);(by[x.kind]||(by[x.kind]=[0,0]));by[x.kind][0]+=t;by[x.kind][1]++;
-    parts+=numv(x.partsCost);labor+=numv(x.laborCost);other+=numv(x.otherCost);hrs+=numv(x.laborHours);
-    const pu=perUnit[x.unitId]||(perUnit[x.unitId]={t:0,n:0,r:0,s:0});pu.t+=t;pu.n++;if(x.kind==="Repair")pu.r+=t;else pu.s+=t;
+    parts+=numv(x.partsCost);labor+=numv(x.laborCost);other+=numv(x.otherCost);hrs+=numv(x.laborHours);down+=numv(x.downtimeHours);
+    const pu=perUnit[x.unitId]||(perUnit[x.unitId]={t:0,n:0,r:0,s:0,d:0});pu.t+=t;pu.n++;pu.d+=numv(x.downtimeHours);if(x.kind==="Repair")pu.r+=t;else pu.s+=t;
     const mk=x.date.slice(0,7);perMonth[mk]=(perMonth[mk]||0)+t}
   const sum=parts+labor+other;
   const unitRows=Object.entries(perUnit).map(([id,v])=>({id,...v})).sort((a,b)=>b.t-a.t);
@@ -450,7 +615,7 @@ function reportData(){
   if(list.length){let a=(from<"1000"?list[0].date:from).slice(0,7),b=(to>"9000"?list[list.length-1].date:to).slice(0,7);
     let[yy,mm]=a.split("-").map(Number);let guard=0;while(guard++<60){const k=yy+"-"+pad(mm);months.push(k);if(k>=b)break;mm++;if(mm>12){mm=1;yy++}}
     if(months.length>24)months=months.slice(-24)}
-  return{from,to,label,list,by,parts,labor,other,hrs,sum,unitRows,months,perMonth};
+  return{from,to,label,list,by,parts,labor,other,hrs,down,sum,unitRows,months,perMonth};
 }
 function chartSvg(D){
   if(D.months.length<2)return"";
@@ -476,7 +641,7 @@ function renderReports(){
   <div class="rep-grid">
     <div class="panel"><h3>Total cost · ${h(D.label)}</h3>
       <div class="big num">${money(D.sum)}</div>
-      <div class="note num">${D.list.length} job${D.list.length===1?"":"s"} · parts ${money0(D.parts)} · labor ${money0(D.labor)}${D.hrs?` (${D.hrs} hrs)`:""} · other ${money0(D.other)}</div>
+      <div class="note num">${D.list.length} job${D.list.length===1?"":"s"} · parts ${money0(D.parts)} · labor ${money0(D.labor)}${D.hrs?` (${fmtHrs(D.hrs)} hrs)`:""} · other ${money0(D.other)} · down ${fmtHrs(D.down)} hrs</div>
       <div class="split num"><div class="r">Repairs<b>${money0(D.by.Repair[0])}</b>${D.by.Repair[1]} jobs</div><div class="s">Service<b>${money0(D.by.Service[0])}</b>${D.by.Service[1]} jobs</div><div class="i">Inspections<b>${money0(D.by.Inspection[0])}</b>${D.by.Inspection[1]} jobs</div></div>
       <div class="share-row">
         <button class="btn primary small" id="copyRep" type="button">Copy summary</button>
@@ -489,10 +654,12 @@ function renderReports(){
     <div class="panel chart"><h3>Cost by month</h3>${chartSvg(D)||`<p class="note">Log work across two or more months to see the trend.</p>`}</div>
   </div>
   <div class="panel" style="margin-top:12px"><h3>Cost by unit</h3>
-    ${D.unitRows.length?`<div class="tbl-wrap"><table class="num"><thead><tr><th>Unit</th><th>Equipment</th><th class="r">Jobs</th><th class="r">Repairs</th><th class="r">Service/Insp.</th><th class="r">Total</th><th style="width:22%"></th></tr></thead><tbody>
-    ${D.unitRows.map(x=>{const u=unitById(x.id);return`<tr><td><b>${h(unitLabel(x.id))}</b></td><td>${h(u?u.name||u.type||"":"")}</td><td class="r">${x.n}</td><td class="r">${money0(x.r)}</td><td class="r">${money0(x.s)}</td><td class="r"><b>${money(x.t)}</b></td><td><div class="bar" style="width:${(x.t/max*100).toFixed(1)}%"></div></td></tr>`}).join("")}
+    ${D.unitRows.length?`<div class="tbl-wrap"><table class="num"><thead><tr><th>Unit</th><th>Equipment</th><th class="r">Jobs</th><th class="r">Repairs</th><th class="r">Service/Insp.</th><th class="r">Hours down</th><th class="r">Total</th><th style="width:18%"></th></tr></thead><tbody>
+    ${D.unitRows.map(x=>{const u=unitById(x.id);return`<tr><td><b>${h(unitLabel(x.id))}</b></td><td>${h(u?u.name||u.type||"":"")}</td><td class="r">${x.n}</td><td class="r">${money0(x.r)}</td><td class="r">${money0(x.s)}</td><td class="r">${fmtHrs(x.d)}</td><td class="r"><b>${money(x.t)}</b></td><td><div class="bar" style="width:${(x.t/max*100).toFixed(1)}%"></div></td></tr>`}).join("")}
     </tbody></table></div>`:`<p class="note">No work logged in this range.</p>`}
   </div>
+  ${(()=>{const watch=(S.rep.unit==="all"?S.units:[unitById(S.rep.unit)].filter(Boolean)).flatMap(u=>dateItems(u).items.filter(i=>i.level!=="ok").map(i=>Object.assign({unit:u.unit},i)));
+    return watch.length?`<div class="panel" style="margin-top:12px"><h3>Dates to watch</h3><div class="rows">${watch.map(i=>`<div class="row" style="cursor:default"><div class="d"><b>${h(i.unit)}</b></div><div class="w"><div class="t">${h(i.label)}</div><div class="s"><span>${h(i.text)}</span><span>${h(fmtDate(i.date))}</span></div></div><div class="c"><span class="pill ${i.level}">${i.level==="bad"?"Overdue":"Due soon"}</span></div></div>`).join("")}</div></div>`:""})()}
   <h3 style="font-family:var(--display);text-transform:uppercase;letter-spacing:.05em;margin:18px 0 8px">Jobs in this report</h3>
   ${rowsHtml(D.list.slice().reverse())}`;
   $("#rr").onchange=e=>{r.range=e.target.value;if(r.range==="custom"&&!r.from){r.from=today().slice(0,4)+"-01-01";r.to=today()}renderReports()};
@@ -510,7 +677,10 @@ function summaryText(D){
   const L=[`FLEET MAINTENANCE REPORT — ${D.label}`,rangeText(D),S.rep.unit==="all"?"All units":`Unit ${unitLabel(S.rep.unit)}`,"",
     `Total cost: ${money(D.sum)} (${D.list.length} jobs)`,
     `Repairs: ${money(D.by.Repair[0])} (${D.by.Repair[1]}) | Service: ${money(D.by.Service[0])} (${D.by.Service[1]}) | Inspections: ${money(D.by.Inspection[0])} (${D.by.Inspection[1]})`,
-    `Parts ${money(D.parts)} · Labor ${money(D.labor)} · Other ${money(D.other)}`];
+    `Parts ${money(D.parts)} · Labor ${money(D.labor)} · Other ${money(D.other)}`,
+    `Hours down: ${fmtHrs(D.down)}`];
+  const watch=(S.rep.unit==="all"?S.units:[unitById(S.rep.unit)].filter(Boolean)).flatMap(u=>dateItems(u).items.filter(i=>i.level!=="ok").map(i=>`${u.unit} ${i.label}: ${i.text} (${i.date})`));
+  if(watch.length){L.push("","DATES TO WATCH");for(const line of watch)L.push(line)}
   if(D.unitRows.length){L.push("","COST BY UNIT");for(const x of D.unitRows){const u=unitById(x.id);L.push(`${unitLabel(x.id)}${u&&u.name?" "+u.name:""} — ${money(x.t)} (${x.n} jobs)`)}}
   const open=D.list.filter(x=>x.status==="open");
   if(open.length){L.push("","OPEN WORK ORDERS");for(const x of open)L.push(`${wo(x)} ${unitLabel(x.unitId)}: ${x.description} — ${stageLabel(x)}${empName(x)?", "+empName(x):""}`)}
@@ -518,8 +688,8 @@ function summaryText(D){
 }
 function csv(D){
   const q=v=>{v=String(v==null?"":v);return/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
-  const rows=[["Date","WO","Unit","Equipment","Type","Status","Problem / work","Parts used","Meter","Labor hrs","Parts $","Labor $","Other $","Total $","Vendor / tech","Assigned to","Priority","Due","Requested by","Work performed"]];
-  for(const x of D.list){const u=unitById(x.unitId);rows.push([x.date,wo(x),unitLabel(x.unitId),u?u.name||"":"",x.kind,stageLabel(x),x.description,x.parts,x.meter,x.laborHours,numv(x.partsCost).toFixed(2),numv(x.laborCost).toFixed(2),numv(x.otherCost).toFixed(2),total(x).toFixed(2),x.vendor,empName(x),x.priority||"",x.dueDate||"",x.requestedBy||"",x.workDone||""])}
+  const rows=[["Date","WO","Unit","Equipment","Type","Status","Problem / work","Parts used","Meter","Labor hrs","Parts $","Labor $","Other $","Total $","Vendor / tech","Assigned to","Priority","Due","Requested by","Work performed","Hours down"]];
+  for(const x of D.list){const u=unitById(x.unitId);rows.push([x.date,wo(x),unitLabel(x.unitId),u?u.name||"":"",x.kind,stageLabel(x),x.description,x.parts,x.meter,x.laborHours,numv(x.partsCost).toFixed(2),numv(x.laborCost).toFixed(2),numv(x.otherCost).toFixed(2),total(x).toFixed(2),x.vendor,empName(x),x.priority||"",x.dueDate||"",x.requestedBy||"",x.workDone||"",numv(x.downtimeHours)?fmtHrs(x.downtimeHours):""])}
   return rows.map(r=>r.map(q).join(",")).join("\r\n");
 }
 function reportHtml(D){
@@ -527,10 +697,10 @@ function reportHtml(D){
   const e=h;
   return`<!doctype html><html><head><meta charset="utf-8"><title>Fleet Maintenance Report</title><style>${css}</style></head><body>
   <h1>Fleet Maintenance Report</h1><div class="m">${e(D.label)} · ${e(rangeText(D))} · ${S.rep.unit==="all"?"All units":"Unit "+e(unitLabel(S.rep.unit))} · Generated ${e(fmtDate(today()))}</div>
-  <h2>Summary</h2><div class="big">${money(D.sum)}</div><div>${D.list.length} jobs · Parts ${money(D.parts)} · Labor ${money(D.labor)} · Other ${money(D.other)}</div>
+  <h2>Summary</h2><div class="big">${money(D.sum)}</div><div>${D.list.length} jobs · Parts ${money(D.parts)} · Labor ${money(D.labor)} · Other ${money(D.other)} · Hours down ${fmtHrs(D.down)}</div>
   <table style="margin-top:8px"><tr><th>Type</th><th class="r">Jobs</th><th class="r">Cost</th></tr>${KINDS.map(k=>`<tr><td>${k}</td><td class="r">${D.by[k][1]}</td><td class="r">${money(D.by[k][0])}</td></tr>`).join("")}</table>
-  <h2>Cost by unit</h2><table><tr><th>Unit</th><th>Equipment</th><th class="r">Jobs</th><th class="r">Total</th></tr>${D.unitRows.map(x=>{const u=unitById(x.id);return`<tr><td>${e(unitLabel(x.id))}</td><td>${e(u?u.name||"":"")}</td><td class="r">${x.n}</td><td class="r">${money(x.t)}</td></tr>`}).join("")}</table>
-  <h2>Work detail</h2><table><tr><th>Date</th><th>Unit</th><th>Type</th><th>Work done</th><th>Vendor / tech</th><th class="r">Total</th></tr>${D.list.map(x=>`<tr><td>${e(x.date)}</td><td>${e(unitLabel(x.unitId))}</td><td>${e(x.kind)}${x.status==="open"?" ("+e(stageLabel(x).toLowerCase())+")":""}${empName(x)?`<div class="m">${e(empName(x))}</div>`:""}</td><td>${e(x.description)}${x.parts?`<div class="m">Parts: ${e(x.parts)}</div>`:""}</td><td>${e(x.vendor)}</td><td class="r">${money(total(x))}</td></tr>`).join("")}</table>
+  <h2>Cost by unit</h2><table><tr><th>Unit</th><th>Equipment</th><th class="r">Jobs</th><th class="r">Hours down</th><th class="r">Total</th></tr>${D.unitRows.map(x=>{const u=unitById(x.id);return`<tr><td>${e(unitLabel(x.id))}</td><td>${e(u?u.name||"":"")}</td><td class="r">${x.n}</td><td class="r">${fmtHrs(x.d)}</td><td class="r">${money(x.t)}</td></tr>`}).join("")}</table>
+  <h2>Work detail</h2><table><tr><th>Date</th><th>Unit</th><th>Type</th><th>Work done</th><th>Vendor / tech</th><th class="r">Hours down</th><th class="r">Total</th></tr>${D.list.map(x=>`<tr><td>${e(x.date)}</td><td>${e(unitLabel(x.unitId))}</td><td>${e(x.kind)}${x.status==="open"||x.stage==="rejected"?" ("+e(stageLabel(x).toLowerCase())+")":""}${empName(x)?`<div class="m">${e(empName(x))}</div>`:""}</td><td>${e(x.description)}${x.parts?`<div class="m">Parts: ${e(x.parts)}</div>`:""}</td><td>${e(x.vendor)}</td><td class="r">${numv(x.downtimeHours)?fmtHrs(x.downtimeHours):""}</td><td class="r">${money(total(x))}</td></tr>`).join("")}</table>
   </body></html>`;
 }
 async function save(filename,data){
@@ -556,8 +726,8 @@ function fleetWorkbookSpec(units, records, todayIso, helpers) {
   const recs = records.slice().sort((a, b) => (a.date || '').localeCompare(b.date || '') || String(a.createdAt).localeCompare(String(b.createdAt)));
   const stLabel = helpers.stageLabel || (x => x.status === 'open' ? 'Open' : 'Completed');
   const who = helpers.empName || (x => x.assignedName || '');
-  const wlHead = ['Date', 'WO #', 'Unit', 'Equipment', 'Type', 'Status', 'Problem / work', 'Parts used', 'Meter', 'Labor hrs', 'Parts $', 'Labor $', 'Other $', 'Total $', 'Vendor / tech', 'Assigned to', 'Priority', 'Due', 'Requested by', 'Work performed'];
-  const wl = { name: 'Work Log', cols: [12, 10, 10, 26, 11, 15, 48, 30, 10, 9, 12, 12, 12, 13, 22, 18, 10, 12, 18, 44], cells: [], freeze: { row: 1, col: 0 } };
+  const wlHead = ['Date', 'WO #', 'Unit', 'Equipment', 'Type', 'Status', 'Problem / work', 'Parts used', 'Meter', 'Labor hrs', 'Parts $', 'Labor $', 'Other $', 'Total $', 'Vendor / tech', 'Assigned to', 'Priority', 'Due', 'Requested by', 'Work performed', 'Hours down'];
+  const wl = { name: 'Work Log', cols: [12, 10, 10, 26, 11, 15, 48, 30, 10, 9, 12, 12, 12, 13, 22, 18, 10, 12, 18, 44, 12], cells: [], freeze: { row: 1, col: 0 } };
   wlHead.forEach((h, c) => wl.cells.push({ r: 0, c, v: h, head: true }));
   recs.forEach((x, i) => {
     const r = i + 1, u = byId[x.unitId];
@@ -566,49 +736,54 @@ function fleetWorkbookSpec(units, records, todayIso, helpers) {
       { v: x.kind || '' }, { v: stLabel(x), tone: x.status === 'open' ? 'warn' : null }, { v: x.description || '', wrap: true }, { v: x.parts || '', wrap: true },
       { v: num(x.meter), fmt: INT }, { v: num(x.laborHours) }, { v: num(x.partsCost) || 0, fmt: MONEY }, { v: num(x.laborCost) || 0, fmt: MONEY },
       { v: num(x.otherCost) || 0, fmt: MONEY }, { f: `SUM(K${r + 1}:M${r + 1})`, fmt: MONEY, bold: true }, { v: x.vendor || '' },
-      { v: who(x) }, { v: x.priority || '' }, x.dueDate ? { date: x.dueDate, fmt: DATE } : { v: '' }, { v: x.requestedBy || '' }, { v: x.workDone || '', wrap: true }];
+      { v: who(x) }, { v: x.priority || '' }, x.dueDate ? { date: x.dueDate, fmt: DATE } : { v: '' }, { v: x.requestedBy || '' }, { v: x.workDone || '', wrap: true },
+      { v: num(x.downtimeHours) || 0, fmt: '0.0' }];
     row.forEach((cell, c) => wl.cells.push(Object.assign({ r, c }, cell)));
   });
   const last = Math.max(recs.length + 1, 2);
-  wl.autoFilter = `A1:T${last}`;
+  wl.autoFilter = `A1:U${last}`;
 
   /* ---- Units ---- */
   const us = units.slice().sort((a, b) => String(a.unit).localeCompare(String(b.unit), undefined, { numeric: true }));
-  const uHead = ['Unit', 'Description', 'Type', 'Make', 'Model', 'Year', 'Serial / VIN', 'Status', 'Meter', 'Meter type', 'PM every', 'PM every (days)', 'PM status (at export)', 'Notes'];
-  const ut = { name: 'Units', cols: [10, 28, 16, 14, 14, 7, 18, 13, 10, 10, 10, 13, 30, 36], cells: [], freeze: { row: 1, col: 1 } };
+  const uHead = ['Unit', 'Description', 'Type', 'Make', 'Model', 'Year', 'Serial / VIN', 'Status', 'Meter', 'Meter type', 'PM every', 'PM every (days)', 'PM status (at export)', 'Notes', 'Warranty', 'Certification', 'Registration', 'PM schedule'];
+  const ut = { name: 'Units', cols: [10, 28, 16, 14, 14, 7, 18, 13, 10, 10, 10, 13, 30, 36, 14, 14, 14, 36], cells: [], freeze: { row: 1, col: 1 } };
   uHead.forEach((h, c) => ut.cells.push({ r: 0, c, v: h, head: true }));
   us.forEach((u, i) => {
     const r = i + 1, pm = pmText(u);
     [{ v: u.unit, bold: true }, { v: u.name || '' }, { v: u.type || '' }, { v: u.make || '' }, { v: u.model || '' }, { v: u.year || '' }, { v: u.serial || '' },
      { v: u.status || 'Running', tone: u.status === 'Down' ? 'bad' : u.status === 'Out of service' ? 'muted' : 'ok' },
      { v: helpers.curMeter(u) || null, fmt: INT }, { v: u.meterType || '' }, { v: num(u.pmMeter), fmt: INT }, { v: num(u.pmDays) },
-     { v: pm ? pm.text : '', tone: pm ? pm.level : null }, { v: u.notes || '', wrap: true }]
+     { v: pm ? pm.text : '', tone: pm ? pm.level : null }, { v: u.notes || '', wrap: true },
+     u.warrantyExpires ? { date: String(u.warrantyExpires).slice(0, 10), fmt: DATE } : { v: '' },
+     u.certExpires ? { date: String(u.certExpires).slice(0, 10), fmt: DATE } : { v: '' },
+     u.registrationExpires ? { date: String(u.registrationExpires).slice(0, 10), fmt: DATE } : { v: '' },
+     { v: helpers.pmSchedule ? helpers.pmSchedule(u) : '', wrap: true }]
       .forEach((cell, c) => ut.cells.push(Object.assign({ r, c }, cell)));
   });
-  ut.autoFilter = `A1:N${Math.max(us.length + 1, 2)}`;
+  ut.autoFilter = `A1:R${Math.max(us.length + 1, 2)}`;
 
   /* ---- Dashboard ---- */
   const R = 5000, W = n => `'Work Log'!$${n}$2:$${n}$${R}`;
-  const D = W('A'), UN = W('C'), TY = W('E'), ST = W('F'), TOT = W('N'), WHO = W('P'), DUE = W('R');
-  const db = { name: 'Dashboard', cols: [14, 30, 14, 34, 9, 14, 16, 16, 16, 13], cells: [] };
+  const D = W('A'), UN = W('C'), TY = W('E'), ST = W('F'), TOT = W('N'), WHO = W('P'), DUE = W('R'), DOWN = W('U');
+  const db = { name: 'Dashboard', cols: [14, 30, 14, 34, 9, 14, 16, 16, 16, 14, 14], cells: [] };
   db.cells.push({ r: 0, c: 0, v: 'Fleet Maintenance Log', title: true });
   db.cells.push({ r: 1, c: 0, v: `Exported ${todayIso}. Dollar figures and counts are formulas over the Work Log and Units tabs, so they update if you add or edit rows there.`, muted: true });
   const kpis = [
     ['Units', `COUNTA(Units!$A$2:$A$${R})`, INT],
     ['Down now', `COUNTIF(Units!$H$2:$H$${R},"Down")`, INT],
-    ['Open work orders', `COUNTIFS(${ST},"<>Completed",${ST},"<>")`, INT],
+    ['Open work orders', `COUNTIFS(${ST},"<>Completed",${ST},"<>Rejected",${ST},"<>")`, INT],
+    ['Hours down this week', `SUMIFS(${DOWN},${D},">="&(TODAY()-WEEKDAY(TODAY(),2)+1),${D},"<="&TODAY())`, '0.0'],
     ['This month', `SUMIFS(${TOT},${D},">="&DATE(YEAR(TODAY()),MONTH(TODAY()),1))`, MONEY0],
     ['Year to date', `SUMIFS(${TOT},${D},">="&DATE(YEAR(TODAY()),1,1))`, MONEY0],
     ['All time', `SUM(${TOT})`, MONEY0]];
-  // KPI tiles laid out in pairs of columns: A, C, F, H … keep simple: one per column A..F
-  const kc = [0, 2, 4, 6, 7, 8];
+  const kc = [0, 2, 4, 6, 7, 8, 9, 1, 3];
   kpis.forEach(([l, f, fmt], i) => { db.cells.push({ r: 3, c: kc[i], v: l, kpiLabel: true }); db.cells.push({ r: 4, c: kc[i], f, fmt, kpi: true }); });
 
   // Cost by unit
   let r = 6;
   db.cells.push({ r, c: 0, v: 'Cost by unit', section: true });
   r++;
-  const cuHead = ['Unit', 'Equipment', 'Status', 'PM status (at export)', 'Jobs', 'Repairs $', 'Service & insp. $', 'This year $', 'All time $', 'Last work'];
+  const cuHead = ['Unit', 'Equipment', 'Status', 'PM status (at export)', 'Jobs', 'Repairs $', 'Service & insp. $', 'This year $', 'All time $', 'Last work', 'Hours down'];
   cuHead.forEach((h, c) => db.cells.push({ r, c, v: h, head: true }));
   const labels = us.map(u => ({ unit: u.unit, name: u.name || u.type || '', status: u.status || 'Running', pm: pmText(u) }));
   const known = new Set(us.map(u => u.unit));
@@ -623,7 +798,8 @@ function fleetWorkbookSpec(units, records, todayIso, helpers) {
      { f: `SUMIFS(${TOT},${UN},${a},${TY},"<>Repair")`, fmt: MONEY },
      { f: `SUMIFS(${TOT},${UN},${a},${D},">="&DATE(YEAR(TODAY()),1,1))`, fmt: MONEY },
      { f: `SUMIFS(${TOT},${UN},${a})`, fmt: MONEY, bold: true },
-     { f: `IFERROR(LOOKUP(2,1/(${UN}=${a}),${D}),"")`, fmt: DATE }]
+     { f: `IFERROR(LOOKUP(2,1/(${UN}=${a}),${D}),"")`, fmt: DATE },
+     { f: `SUMIFS(${DOWN},${UN},${a})`, fmt: '0.0' }]
       .forEach((cell, c) => db.cells.push(Object.assign({ r, c }, cell)));
   });
   if (!labels.length) { r++; db.cells.push({ r, c: 0, v: 'No units yet. Add units in the app, then export again.', muted: true }); }
@@ -631,6 +807,7 @@ function fleetWorkbookSpec(units, records, todayIso, helpers) {
     const lastU = r + 1; r++;
     db.cells.push({ r, c: 0, v: 'Total', bold: true, totalRow: true });
     for (let c = 4; c <= 8; c++) { const L2 = colL(c); db.cells.push({ r, c, f: `SUM(${L2}${first}:${L2}${lastU})`, fmt: c === 4 ? INT : MONEY, bold: true, totalRow: true }); }
+    db.cells.push({ r, c: 10, f: `SUM(K${first}:K${lastU})`, fmt: '0.0', bold: true, totalRow: true });
   }
 
   // Open work orders by person
@@ -641,7 +818,7 @@ function fleetWorkbookSpec(units, records, todayIso, helpers) {
     db.cells.push({ r, c: 0, v: 'Open work orders by person', section: true });
     r++;
     ['Person', 'Open', 'Overdue'].forEach((h, c) => db.cells.push({ r, c, v: h, head: true }));
-    const openCrit = `${ST},"<>Completed",${ST},"<>"`;
+    const openCrit = `${ST},"<>Completed",${ST},"<>Rejected",${ST},"<>"`;
     const pFirst = r + 2;
     people.forEach(n => {
       r++; const a = `$A${r + 1}`;
@@ -697,7 +874,7 @@ async function exportExcel(btn){
   const old=btn?btn.textContent:"";if(btn){btn.disabled=true;btn.textContent="Building Excel…"}
   try{
     const ExcelJS=await loadExcel();
-    const sheets=fleetWorkbookSpec(S.units,S.records,today(),{total,wo,meterUnit,curMeter,pmText:pmStatus,stageLabel,empName,employees:S.employees});
+    const sheets=fleetWorkbookSpec(S.units,S.records,today(),{total,wo,meterUnit,curMeter,pmText:pmStatus,pmSchedule:pmScheduleText,stageLabel,empName,employees:S.employees});
     const wb=new ExcelJS.Workbook();wb.creator="Fleet Maintenance Log";wb.created=new Date();
     const F="Arial",STEEL="FF26303A",ORANGE="FFC2410C",TONE={ok:"FF2C7A4B",bad:"FFB42318",warn:"FFA86A12",muted:"FF6B6E73"};
     for(const sp of sheets){
@@ -746,11 +923,11 @@ function renderOrders(){
   else list=openAll.filter(r=>f.view==="mine"?r.assignedTo===me:f.view==="unassigned"?!r.assignedTo:true)
     .sort((a,b)=>(isOverdue(b)-isOverdue(a))||(priRank(a.priority)-priRank(b.priority))||((a.dueDate||"9999").localeCompare(b.dueDate||"9999"))||((a.date||"").localeCompare(b.date||"")));
   const emps=sortedEmps();
-  const meRow=`<div class="me-row"><span>This phone belongs to</span>${emps.length?`<select id="meSel" aria-label="Who uses this phone"><option value="">Choose your name…</option>${emps.map(e=>`<option value="${h(e.id)}" ${me===e.id?"selected":""}>${h(e.name)}</option>`).join("")}</select>`:`<span>— add your team first</span>`}<span class="sp" style="flex:1"></span>${S.canWrite?`<button class="btn small" id="teamBtn" type="button">Team${emps.length?` (${emps.length})`:""}</button>`:""}</div>`;
+  const meRow=`<div class="me-row"><span>This phone belongs to</span>${emps.length?`<select id="meSel" aria-label="Who uses this phone"><option value="">Choose your name…</option>${emps.map(e=>`<option value="${h(e.id)}" ${me===e.id?"selected":""}>${h(e.name)}</option>`).join("")}</select>`:`<span>— add your team first</span>`}<span class="sp" style="flex:1"></span>${S.canWrite?`<button class="btn small" id="remBtn" type="button">Reminders</button><button class="btn small" id="teamBtn" type="button">Team${emps.length?` (${emps.length})`:""}</button>`:""}</div>`;
   const chips=`<div class="toolbar"><div class="chips" role="group" aria-label="Show">${views.map(([k,l,n])=>`<button class="chip" type="button" data-view="${k}" aria-pressed="${f.view===k}">${l}${n!=null?` <span class="n">${n}</span>`:""}</button>`).join("")}</div></div>`;
   const card=r=>{const u=unitById(r.unitId);return`<button class="wo" type="button" data-wo="${h(r.id)}" data-pri="${h(r.priority||"Normal")}">
     <div class="wo-top"><span class="tag">${h(unitLabel(r.unitId))}</span><span class="wo-title">${h(r.description||"(no description)")}</span>${r.priority==="Urgent"||r.priority==="High"?`<span class="pri ${h(r.priority)}">${h(r.priority)}</span>`:""}</div>
-    <div class="wo-meta">${whoHtml(r)}${dueHtml(r)}<span class="kind ${h(r.kind)}">${h(r.kind)}</span><span class="mono">${wo(r)}</span></div></button>`};
+    <div class="wo-meta">${whoHtml(r)}${dueHtml(r)}<span class="kind ${h(r.kind)}">${h(r.kind)}</span><span class="mono">${wo(r)}</span>${numv(r.downtimeHours)?`<span class="num">${fmtHrs(r.downtimeHours)} hrs down</span>`:""}</div></button>`};
   let body;
   if(f.view==="done")body=list.length?rowsHtml(list):`<div class="empty"><p>No work orders completed in the last 30 days.</p></div>`;
   else if(!list.length){
@@ -763,6 +940,7 @@ function renderOrders(){
   bindRows(v);
   const ms=$("#meSel");if(ms)ms.onchange=()=>{S.me=ms.value;try{localStorage.setItem("fml-me",S.me)}catch(_){}if(S.me){f.view="mine";toast("This phone is set to "+empById(S.me).name)}renderOrders()};
   const tb=$("#teamBtn");if(tb)tb.onclick=()=>teamSheet();
+  const rb=$("#remBtn");if(rb)rb.onclick=()=>reminderSheet();
   const wf=$("#woFirst");if(wf)wf.onclick=()=>workForm();
 }
 
@@ -770,23 +948,39 @@ function woDetail(id,opt={}){
   const r=S.records.find(x=>x.id===id);if(!r){toast("That work order wasn't found. It may have been deleted.");return}
   const u=unitById(r.unitId),st=stageOf(r),emp=r.assignedTo&&empById(r.assignedTo),name=empName(r),me=S.me&&empById(S.me)?S.me:"";
   const open=r.status==="open",cw=S.canWrite;
-  const msg=woMessage(r),subj=`Work order ${wo(r)} – ${unitLabel(r.unitId)}`;
+  const ask=empByName(r.requestedBy);
+  const notifyPerson=opt.who==="requester"&&ask?ask:emp;
+  const notifyName=notifyPerson&&notifyPerson.name;
+  const msg=decisionMessage(r),subj=`Work order ${wo(r)} – ${unitLabel(r.unitId)}`;
   const ph=emp&&phoneDigits(emp.phone),em=emp&&emp.email;
-  const dl=[["Unit",`${unitLabel(r.unitId)}${u&&u.name?" — "+u.name:""}`],["Type",r.kind],["Assigned to",name||"Unassigned"],["Requested by",r.requestedBy],["Source",r.source],["Reported again",r.checkLog],
+  const aph=ask&&phoneDigits(ask.phone),aem=ask&&ask.email;
+  const nph=notifyPerson&&phoneDigits(notifyPerson.phone),nem=notifyPerson&&notifyPerson.email;
+  const photos=photosOf(r.photos);
+  const approvalLine=r.approvalDecision?`${r.approvalDecision==="approved"?"Approved":"Rejected"} by ${r.approvalBy||"the shop"}${r.approvalAt?" · "+fmtDate(String(r.approvalAt).slice(0,10)):""}${r.approvalNote?" — "+r.approvalNote:""}`:"";
+  const dl=[["Unit",`${unitLabel(r.unitId)}${u&&u.name?" — "+u.name:""}`],["Type",r.kind],["Assigned to",name||"Unassigned"],["Requested by",r.requestedBy],["Source",r.source],[r.source==="Daily check"?"Failed items":"Reported again",r.checkLog],
     ["Opened",fmtDate(r.date)],["Due",r.dueDate?fmtDate(r.dueDate):""],["Meter",r.meter?numv(r.meter).toLocaleString()+" "+meterUnit(u):""],
+    ["Hours down",numv(r.downtimeHours)?fmtHrs(r.downtimeHours):""],
+    ["Approval",approvalLine],
     ["Work performed",r.workDone],["Parts used",partsOf(r).map(p=>[p.qty?p.qty+" ×":"",p.no,p.desc,p.cost?"— "+money(numv(p.cost)):""].filter(Boolean).join(" ")).join("\n")],["Labor",r.laborHours?`${r.laborHours} hrs${numv(r.laborRate)?" × "+money(numv(r.laborRate))+"/hr":""}${numv(r.laborCost)?" = "+money(numv(r.laborCost)):""}`:""],["Vendor / tech",r.vendor],
     ["Cost",total(r)?money(total(r)):""],["Completed",r.completedAt?fmtDate(String(r.completedAt).slice(0,10)):""]].filter(x=>x[1]);
+  const shareLbl=opt.notify&&notifyName?(opt.who==="requester"?`Let ${h(notifyName.split(" ")[0])} know`:`Let ${h(notifyName)} know`):"Send this work order";
   openSheet(`${wo(r)} · ${h(unitLabel(r.unitId))}`,`
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span class="stage ${st}">${h(stageLabel(r))}</span>${r.priority&&r.priority!=="Normal"?`<span class="pri ${h(r.priority)}">${h(r.priority)} priority</span>`:""}${dueHtml(r)}</div>
     <p class="wo-desc">${h(r.description||"(no description)")}</p>
+    ${photos.length?thumbsHtml(photos):""}
+    ${open&&st==="approval"&&cw?`<div class="share-box notify"><span class="lbl">Waiting on approval</span>
+      <div class="f"><label for="dNote">Note (optional)</label><input type="text" id="dNote" placeholder="Why you approved or rejected it"></div>
+      <div class="actions"><button class="btn primary" id="dApprove" type="button">Approve</button><button class="btn danger" id="dReject" type="button">Reject</button></div>
+      <span class="note">Approve moves it to ${r.dueDate&&r.dueDate>=today()?"Scheduled":"Open"}. Reject closes it. ${meName()?`Recorded as ${h(meName())}.`:"Set this phone's name under Work orders so the record shows who decided."}</span></div>`:""}
     ${open&&cw?`<div class="f"><span class="lbl">Update status</span><div class="seg wrap4 grid" id="dStage">${STAGES.map(([k,l])=>`<button type="button" data-s="${k}" aria-pressed="${st===k}">${STAGE_BTN[k]||l}</button>`).join("")}</div></div>
       <div class="actions">${me&&r.assignedTo!==me?`<button class="btn" id="dMine" type="button">Assign to me</button>`:""}<button class="btn primary" id="dDone" type="button">Complete job…</button></div>`:""}
     <dl class="dl">${dl.map(([k,v])=>`<dt>${k}</dt><dd>${h(v)}</dd>`).join("")}</dl>
     <div class="share-box ${opt.notify?"notify":""}">
-      <span class="lbl">${opt.notify&&name?`Let ${h(name)} know`:"Send this work order"}</span>
+      <span class="lbl">${shareLbl}</span>
       <div class="actions">
-        ${ph?`<a class="btn ${opt.notify?"primary":""}" href="sms:${h(ph)}?body=${encodeURIComponent(msg)}">Text ${h(emp.name.split(" ")[0])}</a>`:""}
-        ${em?`<a class="btn ${opt.notify&&!ph?"primary":""}" href="mailto:${h(em)}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(msg)}">Email ${h(emp.name.split(" ")[0])}</a>`:""}
+        ${(()=>{const list=[];const add=p=>{if(p&&!list.some(x=>x.id===p.id))list.push(p)};if(opt.notify&&notifyPerson)add(notifyPerson);else{add(emp);add(ask)}
+          return list.map((p,i)=>{const phone=phoneDigits(p.phone),mail=p.email,first=p.name.split(" ")[0],primary=opt.notify&&i===0;
+            return `${phone?`<a class="btn ${primary?"primary":""}" href="sms:${h(phone)}?body=${encodeURIComponent(msg)}">Text ${h(first)}</a>`:""}${mail?`<a class="btn ${primary&&!phone?"primary":""}" href="mailto:${h(mail)}?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(msg)}">Email ${h(first)}</a>`:""}`}).join("")})()}
         ${navigator.share?`<button class="btn" id="dShare" type="button">Share…</button>`:""}
         <button class="btn" id="dCopy" type="button">Copy link</button>
         <button class="btn" id="dPrint" type="button">Print</button>
@@ -800,6 +994,24 @@ function woDetail(id,opt={}){
         sc.querySelectorAll("#dStage button").forEach(x=>x.setAttribute("aria-pressed",x===b));
         const k=b.dataset.s,extra=k==="in_progress"&&!r.assignedTo&&me?{assignedTo:me,assignedName:empById(me).name}:{};
         upd(Object.assign({stage:k},extra),`${wo(r)} marked ${stageName(k).toLowerCase()}`)});
+      const decide=async(decision)=>{
+        const note=($("#dNote")&&$("#dNote").value||"").trim();
+        const by=meName()||"This phone",at=new Date().toISOString();
+        const next=r.dueDate&&r.dueDate>=today()?"scheduled":"open";
+        const data=decision==="approved"
+          ?{stage:next,approvalDecision:"approved",approvalBy:by,approvalAt:at,approvalNote:note}
+          :{status:"done",stage:"rejected",date:today(),approvalDecision:"rejected",approvalBy:by,approvalAt:at,approvalNote:note,completedAt:at};
+        try{
+          await S.db.collection("records").doc(r.id).update(Object.assign({updatedAt:at},data));
+          const label=decision==="approved"?`${wo(r)} approved — now ${stageName(next).toLowerCase()}`:`${wo(r)} rejected and closed`;
+          toast(label);
+          const who=empByName(r.requestedBy);
+          if(who&&(who.phone||who.email))woDetail(r.id,{notify:true,who:"requester"});
+          else if($("#scrim"))woDetail(r.id);
+        }catch(e){toast(errMsg(e))}
+      };
+      const ap=$("#dApprove");if(ap)ap.onclick=()=>decide("approved");
+      const rj=$("#dReject");if(rj)rj.onclick=()=>decide("rejected");
       const dm=$("#dMine");if(dm)dm.onclick=()=>upd({assignedTo:me,assignedName:empById(me).name},`${wo(r)} assigned to you`);
       const dd=$("#dDone");if(dd)dd.onclick=()=>workForm({recId:r.id,complete:true});
       const de=$("#dEdit");if(de)de.onclick=()=>workForm({recId:r.id});
@@ -828,7 +1040,8 @@ function printWO(r){
     <h2>Parts used</h2><table><tr><th style="width:10%">Qty</th><th style="width:22%">Part #</th><th>Description</th><th style="width:16%">Cost</th></tr>${partRows.map(p=>`<tr><td>${e(p.qty)}</td><td>${e(p.no)}</td><td>${e(p.desc)}</td><td>${String(p.cost).trim()?"$"+numv(p.cost).toFixed(2):""}</td></tr>`).join("")}${blankRows(partRows.length?Math.max(0,3-partRows.length):4)}${numv(r.partsCost)?`<tr><td colspan="3" style="text-align:right;font-weight:bold">Parts total</td><td><b>${m2(r.partsCost)}</b></td></tr>`:""}</table>
     <div class="keep"><h2>Labor &amp; cost</h2><table class="cost">
       <tr><th>Labor hours</th><td>${e(r.laborHours||"")}</td><th>Labor rate</th><td>${numv(r.laborRate)?m2(r.laborRate)+" / hr":""}</td></tr>
-      <tr><th>Meter at finish</th><td>${e(r.meter||"")} ${e(meterUnit(u))}</td><th>Vendor / tech</th><td>${e(r.vendor||"")}</td></tr>
+      <tr><th>Meter at finish</th><td>${e(r.meter||"")} ${e(meterUnit(u))}</td><th>Hours down</th><td>${numv(r.downtimeHours)?fmtHrs(r.downtimeHours):""}</td></tr>
+      <tr><th>Vendor / tech</th><td>${e(r.vendor||"")}</td><th>Approval</th><td>${e(r.approvalDecision?`${r.approvalDecision} by ${r.approvalBy||""}${r.approvalNote?" — "+r.approvalNote:""}`:"")}</td></tr>
       <tr><th>Parts</th><td>${cell$(r.partsCost)}</td><th>Labor</th><td>${cell$(r.laborCost)}</td></tr>
       <tr><th>Other</th><td>${cell$(r.otherCost)}</td><th class="tot">Total</th><td class="tot">${total(r)?m2(total(r)):""}</td></tr></table>
     <div class="sig"><div>Technician signature &nbsp;/&nbsp; date</div><div>Supervisor sign-off &nbsp;/&nbsp; date</div></div></div>
@@ -847,6 +1060,8 @@ function teamSheet(editId){
       <div class="f"><label for="eRole">Role</label><input type="text" id="eRole" value="${h(ed?ed.role||"":"")}" placeholder="e.g. Mechanic"></div></div>
     <div class="g2"><div class="f"><label for="ePhone">Cell phone</label><input type="tel" id="ePhone" value="${h(ed?ed.phone||"":"")}" placeholder="910-555-0123" autocomplete="off"></div>
       <div class="f"><label for="eEmail">Email</label><input type="email" id="eEmail" value="${h(ed?ed.email||"":"")}" placeholder="optional" autocomplete="off"></div></div>
+    <div class="f"><label for="eCar">Text messages via</label><select id="eCar">${carrierOptions(ed&&ed.smsCarrier)}</select><span class="hint">Used only if daily reminders are set to text this person. US carriers, 10-digit numbers.</span></div>
+    <div class="f" id="eCarOtherWrap" hidden><label for="eCarOther">Carrier email gateway</label><input type="text" id="eCarOther" placeholder="sms.example.com" value="${h(ed&&ed.smsCarrier&&!CARRIERS.some(c=>c[0]===ed.smsCarrier)?ed.smsCarrier:"")}"></div>
     <div class="err" id="eErr" role="alert"></div>`,
     `${ed?`<button class="btn danger small" id="eDel" type="button">Remove</button><button class="btn ghost small" id="eNew" type="button">Cancel edit</button>`:""}<span class="sp"></span><button class="btn ghost" data-close type="button">Done</button><button class="btn primary" id="eSave" type="button">${ed?"Save":"Add person"}</button>`,
     sc=>{
@@ -857,11 +1072,16 @@ function teamSheet(editId){
       $("#eSave").onclick=async()=>{
         const name=$("#eName").value.trim();if(!name){$("#eErr").textContent="Enter the person's name.";$("#eName").focus();return}
         if(S.employees.some(x=>x.name.toLowerCase()===name.toLowerCase()&&(!ed||x.id!==ed.id))){$("#eErr").textContent=`${name} is already on the team.`;return}
-        const data={name,role:$("#eRole").value.trim(),phone:$("#ePhone").value.trim(),email:$("#eEmail").value.trim(),createdAt:ed?ed.createdAt:new Date().toISOString()};
+        const picked=$("#eCar").value;
+        const smsCarrier=picked==="other"?$("#eCarOther").value.trim().replace(/^@/,""):picked;
+        const data={name,role:$("#eRole").value.trim(),phone:$("#ePhone").value.trim(),email:$("#eEmail").value.trim(),smsCarrier,createdAt:ed?ed.createdAt:new Date().toISOString()};
         const btn=$("#eSave");btn.disabled=true;btn.textContent="Saving…";
         try{const col=S.db.collection("employees");await (ed?col.doc(ed.id):col.doc()).set(data);toast(ed?"Saved":`${name} added`);teamSheet()}
         catch(e){$("#eErr").textContent=errMsg(e);btn.disabled=false;btn.textContent=ed?"Save":"Add person"}
       };
+      const car=$("#eCar"),other=$("#eCarOtherWrap");
+      const syncCar=()=>{other.hidden=car.value!=="other"};
+      car.onchange=syncCar;syncCar();
       if(!ed)setTimeout(()=>{const n=$("#eName");if(n&&!emps.length)n.focus()},50);
     });
 }
@@ -896,6 +1116,10 @@ function workForm({recId,unitId,complete}={}){
     <div class="f"><label for="wUnit">Unit</label><select id="wUnit" ${dis}><option value="">Choose a unit…</option>${sortedUnits().map(u=>`<option value="${h(u.id)}" ${r.unitId===u.id?"selected":""}>${h(u.unit)} — ${h(u.name||u.type||"")}</option>`).join("")}</select></div>
     <div class="f"><span class="lbl">Type of work</span><div class="seg" id="wKind">${KINDS.map(k=>`<button type="button" aria-pressed="${k===kind}" data-k="${k}" ${dis}>${k}</button>`).join("")}</div></div>
     <div class="f"><label for="wDesc">Problem / work to do</label><textarea id="wDesc" placeholder="e.g. Hydraulic leak at tilt cylinder, mast drifts down when parked" ${dis}>${h(r.description||"")}</textarea></div>
+    <div class="f"><span class="lbl">Photos</span><div class="thumbs" id="wPhotos"></div>
+      ${ro?"":`<div class="actions"><button class="btn small" id="wCam" type="button">Camera</button><button class="btn small" id="wLib" type="button">Choose photo</button></div>
+      <input type="file" id="wCamIn" accept="image/*" capture="environment" hidden><input type="file" id="wLibIn" accept="image/*" hidden>`}
+      <span class="hint">Up to 8. Photos are shrunk on this phone before they upload.</span></div>
     <div class="g2"><div class="f"><label for="wWho">Assign to</label><select id="wWho" ${dis}><option value="">Unassigned</option>${emps.map(e=>`<option value="${h(e.id)}" ${r.assignedTo===e.id?"selected":""}>${h(e.name)}</option>`).join("")}</select>${emps.length?"":`<span class="hint">Add people under Work orders → Team.</span>`}</div>
       <div class="f"><label for="wPri">Priority</label><select id="wPri" ${dis}>${PRIS.map(p=>`<option ${pri===p?"selected":""}>${p}</option>`).join("")}</select></div></div>
     <div class="g2"><div class="f"><label for="wDue">Due date</label><input type="date" id="wDue" value="${h(r.dueDate||"")}" ${dis}></div>
@@ -909,6 +1133,8 @@ function workForm({recId,unitId,complete}={}){
       <div class="phead" id="pHead"><span>Qty</span><span>Part #</span><span>Cost $</span><span></span></div>
       <div class="plist" id="pList"></div>
       ${ro?"":`<button class="btn small" id="pAdd" type="button" style="align-self:flex-start">+ Add part</button>`}</div>
+    <div class="g2"><div class="f"><label for="wDown">Hours the unit was down</label><input type="number" id="wDown" inputmode="decimal" min="0" step="0.5" value="${h(r.downtimeHours||"")}" placeholder="0" ${dis}><span class="hint">Out of service for this job</span></div>
+      <div class="f" id="wPmWrap"><label for="wPm">This completes PM task</label><select id="wPm" ${dis}><option value="">Not a scheduled PM</option></select><span class="hint">Shown for service work. Completing the job moves that PM forward.</span></div></div>
     <div class="g3"><div class="f"><label for="wLH">Labor hours</label><input type="number" id="wLH" inputmode="decimal" min="0" step="0.25" value="${h(r.laborHours||"")}" placeholder="0" ${dis}></div>
       <div class="f"><label for="wLR">Rate $/hr</label><input type="number" id="wLR" inputmode="decimal" min="0" step="0.01" value="${h(rate0)}" placeholder="0" ${dis}></div>
       <div class="f"><label for="wLC">Labor $ <span class="hint" id="lcHint" style="text-transform:none;letter-spacing:0"></span></label><input type="number" id="wLC" inputmode="decimal" min="0" step="0.01" value="${h(r.laborCost||"")}" placeholder="0" ${dis}></div></div>
@@ -920,7 +1146,22 @@ function workForm({recId,unitId,complete}={}){
     ro?`<span class="sp"></span><button class="btn" data-close type="button">Close</button>`:
     `${ex?`<button class="btn danger small" id="wDel" type="button">Delete</button>`:""}<span class="sp"></span><button class="btn ghost" data-close type="button">Cancel</button><button class="btn primary" id="wSave" type="button">${ex?(complete?"Complete job":"Save changes"):"Save work order"}</button>`,
     sc=>{
-      const upd=()=>{$("#wTot").textContent=money(numv($("#wPC").value)+numv($("#wLC").value)+numv($("#wOC").value));const u=unitById($("#wUnit").value);$("#wMU").textContent=u&&meterUnit(u)?`(${meterUnit(u)})`:""};
+      const photos=photosOf(r.photos).slice();
+      const drawPhotos=()=>{const box=$("#wPhotos");box.innerHTML=photos.map((p,i)=>`<span class="thumbx"><a href="${h(p.url||p.thumb)}" target="_blank" rel="noopener"><img src="${h(p.thumb||p.url)}" alt="${h(p.name||"Photo")}" onerror="this.parentNode.classList.add('broken')"></a>${ro?"":`<button class="px" type="button" data-pi="${i}" aria-label="Remove photo">×</button>`}</span>`).join("");
+        box.querySelectorAll("[data-pi]").forEach(b=>b.onclick=()=>{photos.splice(+b.dataset.pi,1);drawPhotos()})};
+      drawPhotos();
+      const take=async files=>{const err=$("#wErr");for(const file of files){if(photos.length>=8){if(err)err.textContent="8 photos is the limit on one work order.";break}try{photos.push(await fileToPhoto(file));drawPhotos()}catch(e){if(err)err.textContent=errMsg(e)}}};
+      const cam=$("#wCam"),lib=$("#wLib");
+      if(cam){cam.onclick=()=>$("#wCamIn").click();$("#wCamIn").onchange=e=>{take(e.target.files||[]);e.target.value=""}}
+      if(lib){lib.onclick=()=>$("#wLibIn").click();$("#wLibIn").onchange=e=>{take(e.target.files||[]);e.target.value=""}}
+      const fillPm=()=>{const sel=$("#wPm");if(!sel)return;const uid=$("#wUnit").value;const tasks=tasksForUnit(uid).filter(t=>isYes(t.active));
+        const show=kind==="Service"||!!(r.pmTaskId);
+        $("#wPmWrap").hidden=!show||(!tasks.length&&!r.pmTaskId);
+        sel.innerHTML=`<option value="">Not a scheduled PM</option>`+tasks.map(t=>{const lv=S.levels.find(l=>l.id===t.levelId);return`<option value="${h(t.id)}" ${t.id===(sel.value||r.pmTaskId)?"selected":""}>${h((lv?lv.name+": ":"")+t.name)}</option>`}).join("");
+        if(r.pmTaskId&&!sel.value)sel.value=r.pmTaskId;
+        if(!show&&kind!=="Service")sel.value="";
+      };
+      const upd=()=>{$("#wTot").textContent=money(numv($("#wPC").value)+numv($("#wLC").value)+numv($("#wOC").value));const u=unitById($("#wUnit").value);$("#wMU").textContent=u&&meterUnit(u)?`(${meterUnit(u)})`:"";fillPm()};
       let plist=partsOf(r);
       const pSum=()=>{const has=plist.some(p=>String(p.cost).trim()!=="");const pc=$("#wPC");
         if(has){pc.value=plist.reduce((a,p)=>a+numv(p.cost),0).toFixed(2);pc.readOnly=true;$("#pcHint").textContent="· from parts list"}
@@ -940,7 +1181,7 @@ function workForm({recId,unitId,complete}={}){
         if(hr>0&&rt>0){lc.value=(hr*rt).toFixed(2);lc.readOnly=true;$("#lcHint").textContent="· hrs × rate"}
         else{lc.readOnly=false;$("#lcHint").textContent=""}upd()};
       ["wPC","wLC","wOC"].forEach(i=>$("#"+i).oninput=upd);["wLH","wLR"].forEach(i=>$("#"+i).oninput=lSum);$("#wUnit").onchange=upd;pSum();lSum();
-      sc.querySelectorAll("#wKind button").forEach(b=>b.onclick=()=>{kind=b.dataset.k;sc.querySelectorAll("#wKind button").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+      sc.querySelectorAll("#wKind button").forEach(b=>b.onclick=()=>{kind=b.dataset.k;sc.querySelectorAll("#wKind button").forEach(x=>x.setAttribute("aria-pressed",x===b));fillPm()});
       sc.querySelectorAll("#wStat button").forEach(b=>b.onclick=()=>{st=b.dataset.s;sc.querySelectorAll("#wStat button").forEach(x=>x.setAttribute("aria-pressed",x===b));
         $("#wDateL").textContent=st==="done"?"Date completed":"Date opened";
         if(st==="done"&&wasOpen&&ex)$("#wDate").value=today();});
@@ -955,32 +1196,45 @@ function workForm({recId,unitId,complete}={}){
         if(!desc){$("#wErr").textContent="Describe the problem or the work to do.";$("#wDesc").focus();return}
         if(!date){$("#wErr").textContent="Enter the date.";return}
         const done=st==="done";
+        const pmTaskId=$("#wPm")&&$("#wPm").value||"";
+        const pmTask=pmTaskId&&S.pmTasks.find(t=>t.id===pmTaskId);
+        const pmLevel=pmTask&&S.levels.find(l=>l.id===pmTask.levelId);
         const data={unitId,unitNumber:(unitById(unitId)||{}).unit||"",kind,date,status:done?"done":"open",stage:done?"done":st,
           description:desc,workDone:$("#wDone").value.trim(),priority:$("#wPri").value,
           assignedTo:who,assignedName:who?(empById(who)||{}).name||"":"",dueDate:$("#wDue").value||"",requestedBy:$("#wReq").value.trim(),
           parts:partsText(plist.filter(p=>p.desc.trim()||p.no.trim())),partsList:JSON.stringify(plist.filter(p=>p.desc.trim()||p.no.trim()).map(p=>({qty:String(p.qty).trim(),no:p.no.trim(),desc:p.desc.trim(),cost:String(p.cost).trim()}))),
-          meter:numv($("#wMeter").value)||null,
+          meter:numv($("#wMeter").value)||null,downtimeHours:numv($("#wDown").value)||null,
+          photos:JSON.stringify(photos.map(p=>({id:p.id||"",name:p.name||"",url:p.url||"",thumb:p.thumb||"",fileId:p.fileId||"",shared:p.shared!==false}))),
+          pmTaskId,pmLevelName:pmLevel?pmLevel.name:(ex&&ex.pmLevelName||""),
+          source:ex&&ex.source||"",checkId:ex&&ex.checkId||"",checkLog:ex&&ex.checkLog||"",
+          approvalBy:ex&&ex.approvalBy||"",approvalAt:ex&&ex.approvalAt||"",approvalNote:ex&&ex.approvalNote||"",approvalDecision:ex&&ex.approvalDecision||"",
           partsCost:numv($("#wPC").value),laborCost:numv($("#wLC").value),otherCost:numv($("#wOC").value),laborHours:numv($("#wLH").value)||null,laborRate:numv($("#wLR").value)||null,
           vendor:$("#wVen").value.trim(),completedAt:done?(ex&&ex.completedAt&&ex.status!=="open"?ex.completedAt:new Date().toISOString()):"",
           createdAt:ex?ex.createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()};
         if(data.laborRate){try{localStorage.setItem("fml-rate",String(data.laborRate))}catch(_){}}
         const btn=$("#wSave");btn.disabled=true;btn.textContent="Saving…";
         try{
-          const col=S.db.collection("records"),ref=ex?col.doc(ex.id):col.doc();
-          await ref.set(data);
+          const id=ex?ex.id:genId();
+          const ops=[{op:"set",collection:"records",id,data}];
           const u=unitById(unitId);
-          if(u&&data.meter&&data.meter>numv(u.meter)){try{await S.db.collection("units").doc(u.id).update({meter:data.meter})}catch(_){}}
+          if(u&&data.meter&&data.meter>numv(u.meter))ops.push({op:"update",collection:"units",id:u.id,data:{meter:data.meter}});
+          if(done&&pmTask){
+            ops.push({op:"set",collection:"pmTasks",id:pmTask.id,data:Object.assign({},pmTask,{lastCompletedAt:date,lastMeter:data.meter||pmTask.lastMeter||"",lastWoId:id})});
+          }
+          await S.db.batch(ops);
           const newlyAssigned=!done&&who&&(!ex||ex.assignedTo!==who);
           closeSheet();
-          if(newlyAssigned){toast(`${wo({id:ref.id})} saved and assigned to ${data.assignedName}`);woDetail(ref.id,{notify:true})}
-          else toast(done?`${wo({id:ref.id})} completed`:ex?"Changes saved":`${wo({id:ref.id})} saved`);
+          if(newlyAssigned){toast(`${wo({id})} saved and assigned to ${data.assignedName}`);woDetail(id,{notify:true})}
+          else toast(done?`${wo({id})} completed`:ex?"Changes saved":`${wo({id})} saved`);
         }catch(e){$("#wErr").textContent=errMsg(e);btn.disabled=false;btn.textContent=ex?(complete?"Complete job":"Save changes"):"Save work order"}
       };
     });
 }
-function errMsg(e){const c=e&&e.code;
+function errMsg(e){const c=e&&e.code;const m=String(e&&e.message||"");
   if(c==="unauthorized")return"The shop code was rejected. Enter the correct code and save again.";
-  if(c==="server")return"The log couldn't save that: "+(e.message||"unknown error");
+  if(/unknown collection|unknown action|bad batch/.test(m))return"The shop sheet is still running the old Apps Script. Paste in the new Code.gs, run setup, and redeploy that same web app URL.";
+  if(m==="image"||m==="compress")return"Couldn't read that photo. Try another one.";
+  if(c==="server")return"The log couldn't save that: "+(m||"unknown error");
   return"Couldn't save right now. Check your connection and try again.";}
 
 /* ---------- Unit form ---------- */
@@ -997,8 +1251,11 @@ function unitForm(id){
     <div class="f"><label for="uSer">Serial / VIN</label><input type="text" id="uSer" value="${h(u.serial||"")}"></div>
     <div class="g2"><div class="f"><label for="uMT">Meter</label><select id="uMT">${["Hours","Miles","None"].map(t=>`<option ${u.meterType===t?"selected":""}>${t}</option>`).join("")}</select></div>
       <div class="f"><label for="uM">Current reading</label><input type="number" id="uM" inputmode="decimal" min="0" step="any" value="${h(u.meter||"")}"></div></div>
-    <div class="g2"><div class="f"><label for="uPM">PM every (hrs / mi)</label><input type="number" id="uPM" inputmode="decimal" min="0" value="${h(u.pmMeter||"")}" placeholder="e.g. 250"><span class="hint">Leave blank if not used</span></div>
-      <div class="f"><label for="uPD">or every (days)</label><input type="number" id="uPD" inputmode="numeric" min="0" value="${h(u.pmDays||"")}" placeholder="e.g. 90"></div></div>
+    ${legacyOnly(ex)?`<div class="g2"><div class="f"><label for="uPM">PM every (hrs / mi)</label><input type="number" id="uPM" inputmode="decimal" min="0" value="${h((ex&&levelsFor(ex.id)[0]&&isYes(levelsFor(ex.id)[0].legacy)?levelsFor(ex.id)[0].everyMeter:u.pmMeter)||"")}" placeholder="e.g. 250"><span class="hint">One interval. Add more levels on the unit page.</span></div>
+      <div class="f"><label for="uPD">or every (days)</label><input type="number" id="uPD" inputmode="numeric" min="0" value="${h((ex&&levelsFor(ex.id)[0]&&isYes(levelsFor(ex.id)[0].legacy)?levelsFor(ex.id)[0].everyDays:u.pmDays)||"")}" placeholder="e.g. 90"></div></div>`:`<p class="note" style="margin:0">This unit has its own PM schedule. Change the levels on the unit page. The old single interval is left as it was.</p>`}
+    <div class="g3"><div class="f"><label for="uWar">Warranty expires</label><input type="date" id="uWar" value="${h(String(u.warrantyExpires||"").slice(0,10))}"></div>
+      <div class="f"><label for="uCert">Certification expires</label><input type="date" id="uCert" value="${h(String(u.certExpires||"").slice(0,10))}"></div>
+      <div class="f"><label for="uReg">Registration expires</label><input type="date" id="uReg" value="${h(String(u.registrationExpires||"").slice(0,10))}"></div></div>
     <div class="f"><span class="lbl">Status</span><div class="seg" id="uStat">${["Running","Down","Out of service"].map(s=>`<button type="button" data-s="${s}" aria-pressed="${(u.status||"Running")===s}">${s}</button>`).join("")}</div></div>
     <div class="f"><label for="uNotes">Notes</label><textarea id="uNotes" placeholder="Location, filters, tire size, key info…">${h(u.notes||"")}</textarea></div>
     <div class="err" id="uErr" role="alert"></div>`,
@@ -1012,11 +1269,30 @@ function unitForm(id){
       $("#uSave").onclick=async()=>{
         const num=$("#uNum").value.trim();if(!num){$("#uErr").textContent="Give the unit a number or name, like FL-07.";$("#uNum").focus();return}
         if(S.units.some(x=>x.unit.toLowerCase()===num.toLowerCase()&&(!ex||x.id!==ex.id))){$("#uErr").textContent=`${num} is already in the fleet.`;return}
+        const simple=legacyOnly(ex);
+        const pmMeter=simple?numv($("#uPM").value)||null:(ex?ex.pmMeter??null:null);
+        const pmDays=simple?numv($("#uPD").value)||null:(ex?ex.pmDays??null:null);
         const data={unit:num,type:$("#uType").value,name:$("#uName").value.trim(),make:$("#uMake").value.trim(),model:$("#uModel").value.trim(),year:$("#uYear").value.trim(),
-          serial:$("#uSer").value.trim(),meterType:$("#uMT").value,meter:numv($("#uM").value)||null,pmMeter:numv($("#uPM").value)||null,pmDays:numv($("#uPD").value)||null,
+          serial:$("#uSer").value.trim(),meterType:$("#uMT").value,meter:numv($("#uM").value)||null,pmMeter,pmDays,
+          warrantyExpires:$("#uWar").value||"",certExpires:$("#uCert").value||"",registrationExpires:$("#uReg").value||"",
           status,notes:$("#uNotes").value.trim(),createdAt:ex?ex.createdAt:new Date().toISOString()};
         const btn=$("#uSave");btn.disabled=true;btn.textContent="Saving…";
-        try{const col=S.db.collection("units");await (ex?col.doc(ex.id):col.doc()).set(data);closeSheet();toast(ex?"Unit updated":`${num} added`)}
+        try{
+          const id=ex?ex.id:genId();
+          const ops=[{op:"set",collection:"units",id,data}];
+          if(ex&&simple){
+            const lv=levelsFor(ex.id)[0];
+            if(lv&&isYes(lv.legacy)){
+              const hrs=numv(pmMeter),days=numv(pmDays);
+              const basis=hrs>0&&days>0?"both":hrs>0?"meter":"calendar";
+              const word=data.meterType==="Miles"?"mi":"hrs";
+              const name=basis==="both"?"Service":basis==="meter"?(String(hrs)+" "+word):("Every "+days+" days");
+              ops.push({op:"set",collection:"levels",id:lv.id,data:Object.assign({},lv,{name,basis,everyMeter:hrs||0,everyDays:days||0,active:hrs>0||days>0?"yes":"no"})});
+            }
+          }
+          await S.db.batch(ops);
+          closeSheet();toast(ex?"Unit updated":`${num} added`);
+        }
         catch(e){$("#uErr").textContent=errMsg(e);btn.disabled=false;btn.textContent=ex?"Save changes":"Add unit"}
       };
     });
@@ -1027,22 +1303,31 @@ function unitDetail(id){
   const u=unitById(id);if(!u)return;
   const rs=recsFor(id).sort((a,b)=>b.date.localeCompare(a.date));const y=today().slice(0,4);
   const life=rs.reduce((s,r)=>s+total(r),0),ytd=rs.filter(r=>r.date.startsWith(y)).reduce((s,r)=>s+total(r),0),rep=rs.filter(r=>r.kind==="Repair").reduce((s,r)=>s+total(r),0);
-  const pm=pmStatus(u);const m=curMeter(u);
+  const pm=pmStatus(u);const m=curMeter(u);const dates=dateItems(u);
+  const sched=pmScheduleText(u);
   openSheet(`${h(u.unit)} · ${h(u.name||u.type||"")}`,`
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${statusPill(u.status)}${pm?`<span class="pill ${pm.level}">${h(pm.text)}</span>`:""}</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${statusPill(u.status)}${pm?`<span class="pill ${pm.level}">${h(pm.text)}</span>`:""}${dates.items.filter(i=>i.level!=="ok").map(i=>`<span class="pill ${i.level}">${h(i.label)}</span>`).join("")}</div>
+    ${S.canWrite?`<div class="actions"><button class="btn primary" id="dCheck" type="button">Daily check</button><button class="btn" id="dPmAdd" type="button">Add PM level</button>${duePmTasks(id).length?`<button class="btn" id="dPmGen" type="button">Open due PMs (${duePmTasks(id).length})</button>`:""}</div>`:""}
     ${S.canWrite?`<div class="f"><span class="lbl">Set status</span><div class="seg" id="dStat">${["Running","Down","Out of service"].map(s=>`<button type="button" data-s="${s}" aria-pressed="${(u.status||"Running")===s}">${s}</button>`).join("")}</div></div>`:""}
     <div class="split num" style="margin-top:0"><div class="i">Lifetime<b>${money0(life)}</b>${rs.length} jobs</div><div class="s">This year<b>${money0(ytd)}</b></div><div class="r">Repairs<b>${money0(rep)}</b>lifetime</div></div>
-    <dl class="dl">${[["Type",u.type],["Make / model",[u.make,u.model].filter(Boolean).join(" ")],["Year",u.year],["Serial",u.serial],["Meter",m?m.toLocaleString()+" "+meterUnit(u):""],["PM interval",[u.pmMeter?u.pmMeter+" "+meterUnit(u):"",u.pmDays?u.pmDays+" days":""].filter(Boolean).join(" or ")],["Notes",u.notes]].filter(x=>x[1]).map(([k,v])=>`<dt>${k}</dt><dd>${h(v)}</dd>`).join("")}</dl>
+    <dl class="dl">${[["Type",u.type],["Make / model",[u.make,u.model].filter(Boolean).join(" ")],["Year",u.year],["Serial",u.serial],["Meter",m?m.toLocaleString()+" "+meterUnit(u):""],["PM schedule",sched],["Warranty",u.warrantyExpires?fmtDate(String(u.warrantyExpires).slice(0,10)):""],["Certification",u.certExpires?fmtDate(String(u.certExpires).slice(0,10)):""],["Registration",u.registrationExpires?fmtDate(String(u.registrationExpires).slice(0,10)):""],["Notes",u.notes]].filter(x=>x[1]).map(([k,v])=>`<dt>${k}</dt><dd>${h(v)}</dd>`).join("")}</dl>
+    ${pmLevelsHtml(u)}
     ${(()=>{const cs=checksFor(id).slice(0,6);if(!cs.length)return"";return`<div><span class="lbl">Daily checks</span></div><div class="rows">${cs.map(c=>`<div class="row" style="cursor:default">
       <div class="d num"><b>${fmtShort(c.date)}</b>${h(fmtTime(c.at))}</div>
-      <div class="w"><div class="t">${h(c.driver||"Driver")}${c.shift?` · ${h(c.shift)} shift`:""}</div><div class="s">${c.hours?`<span class="num">${numv(c.hours).toLocaleString()} ${meterUnit(u)}</span>`:""}${c.defects?`<span>${h(String(c.defects).split("\n").length)} defect${String(c.defects).split("\n").length>1?"s":""}</span>`:""}</div></div>
-      <div class="c"><span class="pill ${c.result==="Pass"?"ok":c.result==="Defects"?"warn":"bad"}">${h(c.result)}</span></div></div>`).join("")}</div>`})()}
+      <div class="w"><div class="t">${h(c.driver||"Driver")}${c.shift?` · ${h(c.shift)} shift`:""}</div><div class="s">${(c.meter||c.hours)?`<span class="num">${numv(c.meter||c.hours).toLocaleString()} ${meterUnit(u)}</span>`:""}${c.defects?`<span>${h(String(c.defects).split("\n").filter(Boolean).length)} failed</span>`:""}${c.notes?`<span>${h(c.notes)}</span>`:""}</div></div>
+      <div class="c">${c.workOrderId?`<button class="btn small" type="button" data-rec="${h(c.workOrderId)}">Job</button>`:""}<span class="pill ${c.result==="Pass"?"ok":c.result==="Defects"?"warn":"bad"}">${h(c.result)}</span></div></div>`).join("")}</div>`})()}
     <div><span class="lbl">Work history</span></div>${rowsHtml(rs,false)}`,
     `${S.canWrite?`<button class="btn small" id="dEdit" type="button">Edit unit</button>`:""}<span class="sp"></span>${S.canWrite?`<button class="btn primary" id="dLog" type="button">+ Work order on ${h(u.unit)}</button>`:`<button class="btn" data-close type="button">Close</button>`}`,
     sc=>{
       bindRows(sc);
       const e=$("#dEdit");if(e)e.onclick=()=>unitForm(id);
       const l=$("#dLog");if(l)l.onclick=()=>workForm({unitId:id});
+      const ck=$("#dCheck");if(ck)ck.onclick=()=>checkForm(id);
+      const pa=$("#dPmAdd");if(pa)pa.onclick=()=>pmScheduleSheet(id);
+      const pg=$("#dPmGen");if(pg)pg.onclick=()=>generateDueSheet(id);
+      sc.querySelectorAll("[data-level]").forEach(b=>b.onclick=()=>levelForm(id,b.dataset.level));
+      sc.querySelectorAll("[data-task]").forEach(b=>b.onclick=()=>taskForm(b.dataset.task));
+      sc.querySelectorAll("[data-task-new]").forEach(b=>b.onclick=()=>taskForm("",b.dataset.taskNew));
       sc.querySelectorAll("#dStat button").forEach(b=>b.onclick=async()=>{if(b.getAttribute("aria-pressed")==="true")return;
         sc.querySelectorAll("#dStat button").forEach(x=>x.setAttribute("aria-pressed",x===b));
         try{await S.db.collection("units").doc(id).update({status:b.dataset.s});toast(`${u.unit} marked ${b.dataset.s}`);setTimeout(()=>{if($("#scrim"))unitDetail(id)},50)}catch(err){toast(errMsg(err))}});
@@ -1069,6 +1354,307 @@ function openPendingWO(){if(!S.pendingWO||S.status!=="ready")return;const id=S.p
 window.addEventListener("hashchange",()=>{readHash();render();openPendingWO()});
 render();
 
+/* ---------- Photos, PM levels, daily checks, reminders ---------- */
+const CARRIERS=[["","No text messages"],["vtext.com","Verizon"],["txt.att.net","AT&T"],["tmomail.net","T-Mobile"],["sms.cricketwireless.net","Cricket"],["email.uscc.net","US Cellular"],["msg.fi.google.com","Google Fi"],["sms.myboostmobile.com","Boost"],["mypixmessages.com","Xfinity Mobile"],["mailmymobile.net","Consumer Cellular"]];
+function carrierOptions(current){
+  const known=CARRIERS.some(c=>c[0]===(current||""));
+  return CARRIERS.map(([v,l])=>`<option value="${h(v)}" ${(current||"")===v?"selected":""}>${h(l)}</option>`).join("")+`<option value="other" ${current&&!known?"selected":""}>Other gateway…</option>`;
+}
+const DEFAULT_CHECKS={
+  "Forklift":["Horn","Lights","Brakes","Steering","Forks and carriage","Mast and chains","Hydraulic leaks","Tires","Seat belt","Backup alarm","Overhead guard","Fuel / battery"],
+  "Truck":["Lights","Brakes","Tires","Horn","Mirrors","Wipers","Fluids","Seat belt","Leaks","Fire extinguisher","Coupling / hitch"],
+  "Trailer":["Tires","Lights","Brakes","Coupling","Landing gear","Doors and latches","Floor and frame","Leaks"],
+  "Air compressor":["Oil level","Air leaks","Oil leaks","Belt and guard","Pressure relief","Drain water","Hoses and fittings","Unusual noise"],
+  "Loader / skid steer":["Horn","Lights","Brakes","Hydraulics","Tires or tracks","Bucket and pins","Seat belt","Backup alarm","Leaks","Coolant"],
+  "Generator":["Oil","Coolant","Fuel","Battery","Leaks","Belts","Unusual noise","Exhaust","Control panel"],
+  "Crane / hoist":["Hook and latch","Wire rope or chain","Limit switch","Brakes","Controls","Leaks","Unusual noise","Capacity label"],
+  "Mower":["Blades","Belts","Tires","Oil","Fuel","Safety switches","Guards","Leaks"],
+  "Other":["Visual damage","Leaks","Controls","Safety devices","Fluids"]
+};
+function checklistId(type){const s=("cl"+String(type||"Other").replace(/[^A-Za-z0-9]/g,"")).slice(0,40);return s.length>=4?s:"clother"}
+function checklistItems(type){
+  const row=S.checklists.find(c=>c.unitType===type);
+  const parsed=row?parseJson(row.items,[]):null;
+  if(Array.isArray(parsed)&&parsed.length)return parsed.map(x=>typeof x==="string"?x:(x&&x.name)||"").map(s=>String(s).trim()).filter(Boolean);
+  return (DEFAULT_CHECKS[type]||DEFAULT_CHECKS.Other).slice();
+}
+function pmLevelsHtml(u){
+  const levels=levelsFor(u.id);
+  if(!levels.length)return"";
+  return `<div><span class="lbl">PM schedule</span></div><div class="plist">${levels.map(lv=>{
+    const tasks=S.pmTasks.filter(t=>t.levelId===lv.id);
+    return `<div class="level-card"><div style="display:flex;gap:8px;align-items:center"><b style="flex:1">${h(lv.name)}</b><span class="note">${h(intervalLabel(lv,u))}${isYes(lv.active)?"":" · paused"}</span>${S.canWrite?`<button class="btn small" type="button" data-level="${h(lv.id)}">Edit</button>`:""}</div>
+      ${tasks.map(t=>{const info=pmTaskInfo(u,lv,t);const parts=parseJson(t.partsJson,[]);const pill=info.status==="overdue"?"bad":info.status==="ok"?"ok":info.status==="off"?"idle":"warn";
+        return `<div class="task-line"><div class="nm"><b>${h(t.name)}</b><div class="note">${h(info.summary)}${Array.isArray(parts)&&parts.length?" · "+h(partsText(parts)):""}</div></div>${S.canWrite?`<button class="btn small" type="button" data-task="${h(t.id)}">Edit</button>`:""}<span class="pill ${pill}">${info.status==="overdue"?"Overdue":info.status==="due"?"Due":info.status==="soon"?"Soon":info.status==="off"?"Paused":"OK"}</span></div>`}).join("")||`<p class="note" style="margin:0">No tasks on this level yet.</p>`}
+      ${S.canWrite?`<button class="btn small" type="button" data-task-new="${h(lv.id)}" style="align-self:flex-start">+ Task</button>`:""}</div>`}).join("")}</div>`;
+}
+const PM_PRESETS=[{name:"250 hrs",basis:"meter",everyMeter:250,everyDays:0},{name:"500 hrs",basis:"meter",everyMeter:500,everyDays:0},{name:"1000 hrs",basis:"meter",everyMeter:1000,everyDays:0},{name:"Weekly",basis:"calendar",everyDays:7,everyMeter:0},{name:"Monthly",basis:"calendar",everyDays:30,everyMeter:0},{name:"Quarterly",basis:"calendar",everyDays:90,everyMeter:0},{name:"Annual",basis:"calendar",everyDays:365,everyMeter:0}];
+function levelForm(unitId,levelId){
+  const u=unitById(unitId);if(!u)return;
+  const ex=levelId?S.levels.find(l=>l.id===levelId):null;
+  const lv=ex||{name:"",basis:u.meterType==="None"?"calendar":"meter",everyMeter:"",everyDays:"",active:"yes"};
+  const word=u.meterType==="Miles"?"miles":"hours";
+  openSheet(ex?`Edit ${h(ex.name)}`:"Add PM level",`
+    <p class="note" style="margin:0">${h(u.unit)} · a level is how often the work comes due. Tasks are the lines of work on that level.</p>
+    <div class="chips" id="lvPre">${PM_PRESETS.map((p,i)=>`<button class="chip" type="button" data-pre="${i}">${h(p.name.replace("hrs",u.meterType==="Miles"?"mi":"hrs"))}</button>`).join("")}</div>
+    <div class="f"><label for="lvName">Name</label><input type="text" id="lvName" value="${h(lv.name||"")}" placeholder="e.g. 250 hour service"></div>
+    <div class="f"><span class="lbl">Comes due by</span><div class="seg" id="lvBasis">${[["meter",word],["calendar","Days"],["both","Whichever first"]].map(([k,l])=>`<button type="button" data-b="${k}" aria-pressed="${lv.basis===k}" ${u.meterType==="None"&&k!=="calendar"?"disabled":""}>${l}</button>`).join("")}</div></div>
+    <div class="g2"><div class="f" id="lvMF"><label for="lvM">Every (${h(meterUnit(u)||"hrs")})</label><input type="number" id="lvM" min="1" inputmode="decimal" value="${h(lv.everyMeter||"")}"></div>
+      <div class="f" id="lvDF"><label for="lvD">Every (days)</label><input type="number" id="lvD" min="1" inputmode="numeric" value="${h(lv.everyDays||"")}"></div></div>
+    <div class="f"><span class="lbl">Active</span><div class="seg" id="lvAct"><button type="button" data-a="yes" aria-pressed="${isYes(lv.active)}">Yes</button><button type="button" data-a="no" aria-pressed="${!isYes(lv.active)}">Paused</button></div></div>
+    <div class="err" id="lvErr" role="alert"></div>`,
+    `${ex?`<button class="btn danger small" id="lvDel" type="button">Delete level</button>`:""}<span class="sp"></span><button class="btn ghost" data-close type="button">Cancel</button><button class="btn primary" id="lvSave" type="button">${ex?"Save level":"Save level"}</button>`,
+    sc=>{
+      let basis=lv.basis||"calendar", active=isYes(lv.active)?"yes":"no";
+      const sync=()=>{const meter=basis==="meter"||basis==="both", days=basis==="calendar"||basis==="both";$("#lvMF").hidden=!meter;$("#lvDF").hidden=!days};
+      sc.querySelectorAll("#lvBasis button").forEach(b=>b.onclick=()=>{if(b.disabled)return;basis=b.dataset.b;sc.querySelectorAll("#lvBasis button").forEach(x=>x.setAttribute("aria-pressed",x===b));sync()});
+      sc.querySelectorAll("#lvAct button").forEach(b=>b.onclick=()=>{active=b.dataset.a;sc.querySelectorAll("#lvAct button").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+      sc.querySelectorAll("[data-pre]").forEach(b=>b.onclick=()=>{const p=PM_PRESETS[+b.dataset.pre];$("#lvName").value=p.name.replace("hrs",u.meterType==="Miles"?"mi":"hrs");basis=u.meterType==="None"?"calendar":p.basis;$("#lvM").value=p.everyMeter||"";$("#lvD").value=p.everyDays||"";sc.querySelectorAll("#lvBasis button").forEach(x=>x.setAttribute("aria-pressed",x.dataset.b===basis));sync()});
+      sync();
+      const del=$("#lvDel");if(del){let armed=false;del.onclick=async()=>{
+        const tasks=S.pmTasks.filter(t=>t.levelId===ex.id);
+        if(tasks.some(t=>S.records.some(r=>r.pmTaskId===t.id&&r.status==="open"))){$("#lvErr").textContent="A work order for this level is still open. Finish it first.";return}
+        if(!armed){armed=true;del.textContent="Tap again to delete";return}
+        const ops=[{op:"delete",collection:"levels",id:ex.id}].concat(tasks.map(t=>({op:"delete",collection:"pmTasks",id:t.id})));
+        if(isYes(ex.legacy))ops.push({op:"update",collection:"units",id:unitId,data:{pmMeter:null,pmDays:null}});
+        del.disabled=true;try{await S.db.batch(ops);closeSheet();toast(ex.name+" removed");unitDetail(unitId)}catch(e){$("#lvErr").textContent=errMsg(e);del.disabled=false}
+      }}
+      $("#lvSave").onclick=async()=>{
+        const name=$("#lvName").value.trim();
+        if(!name){$("#lvErr").textContent="Name this level, like 250 hours or Annual.";return}
+        if(S.levels.some(l=>l.unitId===unitId&&l.name.toLowerCase()===name.toLowerCase()&&(!ex||l.id!==ex.id))){$("#lvErr").textContent=u.unit+" already has a "+name+" level.";return}
+        const everyMeter=numv($("#lvM").value), everyDays=numv($("#lvD").value);
+        if((basis==="meter"||basis==="both")&&!(everyMeter>0)){$("#lvErr").textContent="Enter how many "+word+" between services.";return}
+        if((basis==="calendar"||basis==="both")&&!(everyDays>=1)){$("#lvErr").textContent="Enter how many days between services.";return}
+        const id=ex?ex.id:genId();
+        const data={unitId,name,basis,everyMeter:basis==="calendar"?0:everyMeter,everyDays:basis==="meter"?0:everyDays,active,legacy:ex?ex.legacy||"no":"no",notes:ex?ex.notes||"":"",createdAt:ex?ex.createdAt:new Date().toISOString()};
+        const btn=$("#lvSave");btn.disabled=true;
+        try{await S.db.collection("levels").doc(id).set(data);closeSheet();toast(name+" saved");if(!ex)taskForm("",id);else unitDetail(unitId)}
+        catch(e){$("#lvErr").textContent=errMsg(e);btn.disabled=false}
+      };
+    });
+}
+function taskForm(taskId,levelId){
+  const ex=taskId?S.pmTasks.find(t=>t.id===taskId):null;
+  const level=S.levels.find(l=>l.id===(ex?ex.levelId:levelId));
+  if(!level){toast("That PM level is gone.");return}
+  const u=unitById(level.unitId)||{};
+  const t=ex||{name:"",instructions:"",partsJson:"[]",active:"yes",lastCompletedAt:"",lastMeter:""};
+  let parts=parseJson(t.partsJson,[]);if(!Array.isArray(parts))parts=[];
+  openSheet(ex?`Edit ${h(ex.name)}`:"Add PM task",`
+    <p class="note" style="margin:0">${h(u.unit||"")} · ${h(level.name)}. ${h(intervalLabel(level,u))}.</p>
+    <div class="f"><label for="tkName">Task</label><input type="text" id="tkName" value="${h(t.name||"")}" placeholder="e.g. Change engine oil and filter"></div>
+    <div class="f"><label for="tkIns">What to do</label><textarea id="tkIns" placeholder="Steps, torque, oil type…">${h(t.instructions||"")}</textarea></div>
+    <div class="f"><span class="lbl">Parts to have on hand</span><div class="plist" id="tkParts"></div><button class="btn small" id="tkAdd" type="button" style="align-self:flex-start">+ Part</button><span class="hint">Optional. These copy onto the service work order. They are not tied to a stockroom.</span></div>
+    <div class="g2"><div class="f"><label for="tkLast">Last done</label><input type="date" id="tkLast" value="${h(String(t.lastCompletedAt||"").slice(0,10))}"></div>
+      <div class="f"><label for="tkLm">Meter at last PM</label><input type="number" id="tkLm" min="0" step="any" value="${h(t.lastMeter||"")}" ${u.meterType==="None"?"disabled":""}></div></div>
+    <div class="f"><span class="lbl">Active</span><div class="seg" id="tkAct"><button type="button" data-a="yes" aria-pressed="${isYes(t.active)}">Yes</button><button type="button" data-a="no" aria-pressed="${!isYes(t.active)}">Paused</button></div></div>
+    <div class="err" id="tkErr" role="alert"></div>`,
+    `${ex?`<button class="btn danger small" id="tkDel" type="button">Delete task</button>`:""}<span class="sp"></span><button class="btn ghost" data-close type="button">Cancel</button><button class="btn primary" id="tkSave" type="button">Save task</button>`,
+    sc=>{
+      let active=isYes(t.active)?"yes":"no";
+      sc.querySelectorAll("#tkAct button").forEach(b=>b.onclick=()=>{active=b.dataset.a;sc.querySelectorAll("#tkAct button").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+      const draw=()=>{const box=$("#tkParts");box.innerHTML=parts.map((p,i)=>`<div class="prow" data-i="${i}"><input type="number" min="0" step="any" data-k="qty" value="${h(p.qty||"")}" placeholder="Qty" aria-label="Quantity"><input type="text" data-k="no" value="${h(p.no||"")}" placeholder="Part #" aria-label="Part number"><input type="number" min="0" step="0.01" data-k="cost" value="${h(p.cost||"")}" placeholder="Cost" aria-label="Cost"><button class="px" type="button" data-x="${i}" aria-label="Remove part">×</button><input class="pdesc" type="text" data-k="desc" value="${h(p.desc||"")}" placeholder="Description" aria-label="Description"></div>`).join("");
+        box.querySelectorAll("input").forEach(inp=>inp.oninput=()=>{parts[+inp.closest(".prow").dataset.i][inp.dataset.k]=inp.value});
+        box.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{parts.splice(+b.dataset.x,1);draw()});};
+      draw();
+      $("#tkAdd").onclick=()=>{parts.push({qty:"",no:"",desc:"",cost:""});draw()};
+      const del=$("#tkDel");if(del){let armed=false;del.onclick=async()=>{
+        if(S.records.some(r=>r.pmTaskId===ex.id&&r.status==="open")){$("#tkErr").textContent="A work order for this task is still open.";return}
+        if(!armed){armed=true;del.textContent="Tap again to delete";return}
+        del.disabled=true;try{await S.db.collection("pmTasks").doc(ex.id).delete();closeSheet();toast("Task removed");unitDetail(level.unitId)}catch(e){$("#tkErr").textContent=errMsg(e);del.disabled=false}
+      }}
+      $("#tkSave").onclick=async()=>{
+        const name=$("#tkName").value.trim();if(!name){$("#tkErr").textContent="Name the task.";return}
+        const kept=parts.filter(p=>String(p.desc||"").trim()||String(p.no||"").trim()).map(p=>({qty:String(p.qty||"").trim(),no:String(p.no||"").trim(),desc:String(p.desc||"").trim(),cost:String(p.cost||"").trim()}));
+        const id=ex?ex.id:genId();
+        const data={unitId:level.unitId,levelId:level.id,name,instructions:$("#tkIns").value.trim(),partsJson:JSON.stringify(kept),active,lastCompletedAt:$("#tkLast").value||"",lastMeter:$("#tkLm").value===""?"":numv($("#tkLm").value),lastWoId:ex?ex.lastWoId||"":"",createdAt:ex?ex.createdAt:new Date().toISOString()};
+        const btn=$("#tkSave");btn.disabled=true;
+        try{await S.db.collection("pmTasks").doc(id).set(data);closeSheet();toast(name+" saved");unitDetail(level.unitId)}
+        catch(e){$("#tkErr").textContent=errMsg(e);btn.disabled=false}
+      };
+    });
+}
+function generateDueSheet(unitId){
+  const tasks=duePmTasks(unitId);
+  if(!tasks.length){toast(unitId?"Nothing is due on this unit that doesn't already have a work order.":"No PMs are due that don't already have a work order.");return}
+  const emps=sortedEmps();
+  openSheet("Generate due PMs",`
+    <p class="note" style="margin:0">This opens one Service work order for each PM that is due or overdue. Due-soon items wait.</p>
+    <div class="rows">${tasks.map(t=>{const u=unitById(t.unitId),lv=S.levels.find(l=>l.id===t.levelId),info=pmTaskInfo(u,lv,t);return `<div class="row" style="cursor:default"><div class="d"><b>${h(u?u.unit:"")}</b></div><div class="w"><div class="t">${h(t.name)}</div><div class="s"><span>${h(lv?lv.name:"")}</span><span>${h(info.summary)}</span></div></div></div>`}).join("")}</div>
+    <div class="f"><label for="pmWho">Assign them to</label><select id="pmWho"><option value="">Leave unassigned</option>${emps.map(e=>`<option value="${h(e.id)}" ${S.me===e.id?"selected":""}>${h(e.name)}</option>`).join("")}</select></div>
+    <div class="err" id="pmErr" role="alert"></div>`,
+    `<span class="sp"></span><button class="btn ghost" data-close type="button">Cancel</button><button class="btn primary" id="pmGo" type="button">Open ${tasks.length} service job${tasks.length>1?"s":""}</button>`,
+    ()=>{
+      $("#pmGo").onclick=async()=>{
+        const who=$("#pmWho").value;
+        const ops=tasks.map(t=>{const built=woFromTask(t,who);return {op:"set",collection:"records",id:built.id,data:built.data}});
+        const btn=$("#pmGo");btn.disabled=true;btn.textContent="Opening…";
+        try{await S.db.batch(ops);closeSheet();toast("Opened "+ops.length+" service job"+(ops.length>1?"s":""));if(unitId)unitDetail(unitId);else{S.tab="orders";render()}}
+        catch(e){$("#pmErr").textContent=errMsg(e);btn.disabled=false;btn.textContent="Try again"}
+      };
+    });
+}
+function woFromTask(task,assignedId){
+  const u=unitById(task.unitId),level=S.levels.find(l=>l.id===task.levelId),info=pmTaskInfo(u,level,task);
+  const list=parseJson(task.partsJson,[]);const parts=Array.isArray(list)?list:[];
+  const who=assignedId&&empById(assignedId);
+  const due=info.suggested&&info.suggested>=today()?info.suggested:today();
+  return {id:genId(),data:{
+    unitId:task.unitId,unitNumber:u?u.unit:"",kind:"Service",status:"open",stage:"open",date:today(),
+    description:[(level?level.name+": ":"")+task.name,task.instructions||""].filter(Boolean).join("\n\n"),
+    priority:info.status==="overdue"?"High":"Normal",requestedBy:"PM schedule",
+    assignedTo:who?who.id:"",assignedName:who?who.name:"",dueDate:due,
+    parts:partsText(parts),partsList:JSON.stringify(parts),partsCost:parts.reduce((s,p)=>s+numv(p.cost),0),laborCost:0,otherCost:0,
+    source:"PM schedule",pmTaskId:task.id,pmLevelName:level?level.name:"",photos:"[]",downtimeHours:null,
+    createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()
+  }};
+}
+function checkForm(unitId){
+  const u=unitById(unitId);if(!u)return;
+  const names=checklistItems(u.type);
+  const items=names.map(name=>({name,result:"pass",note:"",photos:[]}));
+  let shift="Day";
+  const me=S.me&&empById(S.me);
+  openSheet(`Daily check · ${h(u.unit)}`,`
+    <p class="note" style="margin:0">Pre-shift inspection for ${h(u.type||"this unit")}. Anything marked Fail opens one repair work order.</p>
+    <div class="g2"><div class="f"><label for="ckWho">Driver</label>${sortedEmps().length?`<select id="ckWho"><option value="">Choose…</option>${sortedEmps().map(e=>`<option value="${h(e.id)}" ${me&&me.id===e.id?"selected":""}>${h(e.name)}</option>`).join("")}</select>`:`<input type="text" id="ckWhoName" placeholder="Your name">`}</div>
+      <div class="f"><span class="lbl">Shift</span><div class="seg" id="ckShift">${["Day","Night","Swing"].map(s=>`<button type="button" data-s="${s}" aria-pressed="${s===shift}">${s}</button>`).join("")}</div></div></div>
+    ${u.meterType==="None"?"":`<div class="f"><label for="ckMeter">Meter reading <span class="hint">(${h(meterUnit(u))})</span></label><input type="number" id="ckMeter" min="0" step="any" inputmode="decimal" placeholder="${curMeter(u)?h(String(curMeter(u))):""}"></div>`}
+    <div id="ckItems"></div>
+    <div class="f"><label for="ckNotes">Notes</label><textarea id="ckNotes" placeholder="Anything else the next driver should know"></textarea></div>
+    <details><summary class="note">Edit the ${h(u.type||"Other")} checklist</summary>
+      <div class="f" style="margin-top:8px"><label for="ckList">One item per line. This changes the list for every ${h(u.type||"Other")}.</label><textarea id="ckList">${h(names.join("\n"))}</textarea><button class="btn small" id="ckSaveList" type="button">Save checklist</button></div></details>
+    <div class="err" id="ckErr" role="alert"></div>`,
+    `<span class="sp"></span><button class="btn ghost" data-close type="button">Cancel</button><button class="btn primary" id="ckSave" type="button">Save check</button>`,
+    sc=>{
+      const draw=()=>{const box=$("#ckItems");box.innerHTML=items.map((it,i)=>`<div class="check-item"><div class="nm">${h(it.name)}${it.result==="fail"?`<input type="text" data-note="${i}" value="${h(it.note)}" placeholder="What's wrong?" style="margin-top:6px">`:""}${it.photos.length?`<div class="thumbs" style="margin-top:6px">${it.photos.map(p=>`<a href="${h(p.url||p.thumb)}" target="_blank" rel="noopener"><img src="${h(p.thumb||p.url)}" alt=""></a>`).join("")}</div>`:""}</div><div class="passfail" role="group" aria-label="${h(it.name)}"><button type="button" data-i="${i}" data-r="pass" aria-pressed="${it.result==="pass"}">Pass</button><button type="button" data-i="${i}" data-r="fail" aria-pressed="${it.result==="fail"}">Fail</button><button type="button" data-i="${i}" data-r="na" aria-pressed="${it.result==="na"}">N/A</button></div></div>${it.result==="fail"?`<div style="margin:-6px 0 8px"><button class="btn small" type="button" data-pic="${i}">${it.photos.length?"Replace photo":"Add photo"}</button><input type="file" id="ckPic${i}" accept="image/*" capture="environment" hidden></div>`:""}`).join("");
+        box.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{items[+b.dataset.i].result=b.dataset.r;draw()});
+        box.querySelectorAll("[data-note]").forEach(inp=>{inp.oninput=()=>{items[+inp.dataset.note].note=inp.value};});
+        box.querySelectorAll("[data-pic]").forEach(b=>b.onclick=()=>{$("#ckPic"+b.dataset.pic).click()});
+        box.querySelectorAll("input[type=file]").forEach(inp=>inp.onchange=async e=>{
+          const i=+inp.id.replace("ckPic","");const file=(e.target.files||[])[0];e.target.value="";if(!file)return;
+          try{items[i].photos=[await fileToPhoto(file)];draw()}catch(err){$("#ckErr").textContent=errMsg(err)}
+        });
+      };
+      draw();
+      sc.querySelectorAll("#ckShift button").forEach(b=>b.onclick=()=>{shift=b.dataset.s;sc.querySelectorAll("#ckShift button").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+      const saveList=$("#ckSaveList");if(saveList)saveList.onclick=async()=>{
+        const lines=$("#ckList").value.split(/\n+/).map(s=>s.trim()).filter(Boolean);
+        if(!lines.length){$("#ckErr").textContent="Leave at least one checklist line.";return}
+        saveList.disabled=true;
+        try{await S.db.collection("checklists").doc(checklistId(u.type)).set({unitType:u.type,items:JSON.stringify(lines),updatedAt:new Date().toISOString()});toast("Checklist saved for "+(u.type||"Other"));saveList.disabled=false}
+        catch(e){$("#ckErr").textContent=errMsg(e);saveList.disabled=false}
+      };
+      $("#ckSave").onclick=async()=>{
+        const sel=$("#ckWho");
+        const driver=sel&&sel.value?(empById(sel.value)||{}).name||"":($("#ckWhoName")?$("#ckWhoName").value.trim():"");
+        if(!driver){$("#ckErr").textContent="Who is doing the check?";return}
+        const meterEl=$("#ckMeter");
+        const meter=meterEl?numv(meterEl.value):null;
+        if(meterEl&&!(meter>0)){$("#ckErr").textContent="Enter the meter reading.";meterEl.focus();return}
+        const failed=items.filter(it=>it.result==="fail");
+        const now=new Date().toISOString();
+        const defects=failed.map(it=>it.name+(it.note?": "+it.note:"")).join("\n");
+        const checkPhotos=failed.flatMap(it=>it.photos);
+        const checkId=genId();
+        const woId=failed.length?genId():"";
+        const check={unitId:u.id,unitNumber:u.unit,unitType:u.type||"",date:today(),at:now,driver,driverId:sel&&sel.value||"",shift,meter:meter||"",hours:meter||"",result:failed.length?"Fail":"Pass",notes:$("#ckNotes").value.trim(),items:JSON.stringify(items.map(it=>({name:it.name,result:it.result,note:it.note,photos:it.photos}))),defects,photos:JSON.stringify(checkPhotos),workOrderId:woId,createdAt:now};
+        const ops=[{op:"set",collection:"checks",id:checkId,data:check}];
+        if(woId){
+          const desc=["Daily check failed.",defects,$("#ckNotes").value.trim()?("Notes: "+$("#ckNotes").value.trim()):""].filter(Boolean).join("\n");
+          ops.push({op:"set",collection:"records",id:woId,data:{
+            unitId:u.id,unitNumber:u.unit,kind:"Repair",status:"open",stage:"open",date:today(),
+            description:desc,priority:"High",requestedBy:driver,source:"Daily check",checkId,checkLog:defects,
+            meter:meter||null,photos:JSON.stringify(checkPhotos),parts:"",partsList:"[]",
+            createdAt:now,updatedAt:now
+          }});
+        }
+        if(meter&&meter>numv(u.meter))ops.push({op:"update",collection:"units",id:u.id,data:{meter}});
+        const btn=$("#ckSave");btn.disabled=true;btn.textContent="Saving…";
+        try{await S.db.batch(ops);closeSheet();toast(woId?wo({id:woId})+" opened for the failed items":"Daily check saved — pass");if(woId)woDetail(woId);else unitDetail(u.id)}
+        catch(e){$("#ckErr").textContent=errMsg(e);btn.disabled=false;btn.textContent="Save check"}
+      };
+    });
+}
+function reminderSheet(){
+  const st=S.settings||PREFS;
+  const ids=parseJson(st.recipients,[]);
+  const chosen=new Set(Array.isArray(ids)?ids:[]);
+  const emps=sortedEmps();
+  openSheet("Daily reminders",`
+    <p class="note" style="margin:0">A morning email of PMs that are due, late work orders, warranty / certification / registration dates, and jobs waiting on approval. The Google Sheet has to have the daily trigger installed once (see the README). Turning this off stops the email even if the trigger is still there.</p>
+    <label class="check-on"><input type="checkbox" id="dgOn" ${st.digestOn==="yes"?"checked":""}> Send the daily reminder</label>
+    <div class="f"><label for="dgDays">Warn this many days before a warranty, certification, or registration date</label><input type="number" id="dgDays" min="1" max="365" value="${h(st.dateSoonDays||30)}"></div>
+    <div class="f"><span class="lbl">Who gets it</span>${emps.length?emps.map(e=>`<label class="check-on"><input type="checkbox" data-who="${h(e.id)}" ${chosen.has(e.id)?"checked":""}> ${h(e.name)}${e.email?"":" <span class='note'>(no email)</span>"}</label>`).join(""):`<p class="note">Add the crew under Team first.</p>`}</div>
+    <label class="check-on"><input type="checkbox" id="dgSms" ${st.includeSms==="yes"?"checked":""}> Also text them, using the carrier on their team card</label>
+    <p class="note">Texts go out as email-to-SMS through the carrier. They need a 10-digit US number and a carrier selected. The message is a short count, not the full list.</p>
+    <div class="err" id="dgErr" role="alert"></div>`,
+    `<span class="sp"></span><button class="btn ghost" data-close type="button">Cancel</button><button class="btn primary" id="dgSave" type="button">Save reminders</button>`,
+    ()=>{
+      $("#dgSave").onclick=async()=>{
+        const recipients=[...document.querySelectorAll("[data-who]")].filter(b=>b.checked).map(b=>b.dataset.who);
+        const on=$("#dgOn").checked;
+        if(on&&!recipients.length){$("#dgErr").textContent="Pick at least one person, or turn the reminder off.";return}
+        const data={digestOn:on?"yes":"no",dateSoonDays:numv($("#dgDays").value)||30,recipients:JSON.stringify(recipients),includeSms:$("#dgSms").checked?"yes":"no",appUrl:location.origin+location.pathname,updatedAt:new Date().toISOString()};
+        const btn=$("#dgSave");btn.disabled=true;
+        try{await S.db.collection("settings").doc("prefs").set(data);closeSheet();toast(on?"Daily reminder is on":"Daily reminder is off")}
+        catch(e){$("#dgErr").textContent=errMsg(e);btn.disabled=false}
+      };
+    });
+}
+function compressImage(file){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    const url=URL.createObjectURL(file);
+    img.onload=()=>{
+      let w=img.naturalWidth||img.width,hgt=img.naturalHeight||img.height;
+      URL.revokeObjectURL(url);
+      if(!w||!hgt){reject(new Error("image"));return}
+      const scale=Math.min(1,1600/Math.max(w,hgt));
+      w=Math.max(1,Math.round(w*scale));hgt=Math.max(1,Math.round(hgt*scale));
+      const canvas=document.createElement("canvas");canvas.width=w;canvas.height=hgt;
+      canvas.getContext("2d").drawImage(img,0,0,w,hgt);
+      const finish=q=>canvas.toBlob(blob=>{
+        if(!blob){reject(new Error("compress"));return}
+        if(blob.size>700000&&q>0.5){finish(Math.round((q-0.12)*100)/100);return}
+        const reader=new FileReader();
+        reader.onload=()=>resolve(String(reader.result));
+        reader.onerror=()=>reject(new Error("compress"));
+        reader.readAsDataURL(blob);
+      },"image/jpeg",q);
+      finish(0.72);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("image"))};
+    img.src=url;
+  });
+}
+async function fileToPhoto(file){
+  const dataUrl=await compressImage(file);
+  const name=(file.name||"photo").replace(/\.\w+$/i,"")+".jpg";
+  if(S.sample)return{id:genId(),name,url:dataUrl,thumb:dataUrl,fileId:"local",shared:true};
+  const j=await call("upload",{name,data:dataUrl,mime:"image/jpeg"});
+  if(j.shared===false)toast("Photo saved. Thumbnails show after the Google account allows anyone-with-the-link on that file.");
+  return{id:genId(),name:j.name||name,url:j.url,thumb:j.thumb||j.url,fileId:j.fileId||"",shared:j.shared!==false};
+}
+function planLegacyClient(units,records,levels){
+  const have={};(levels||[]).forEach(l=>{if(l&&l.unitId)have[l.unitId]=true});
+  const out=[];
+  (units||[]).forEach(u=>{
+    if(!u||!u.id||have[u.id])return;
+    const hrs=numv(u.pmMeter),days=numv(u.pmDays);
+    if(!(hrs>0)&&!(days>0))return;
+    const basis=hrs>0&&days>0?"both":hrs>0?"meter":"calendar";
+    const word=u.meterType==="Miles"?"mi":"hrs";
+    const name=basis==="both"?"Service":basis==="meter"?(String(Math.round(hrs*100)/100)+" "+word):("Every "+String(Math.round(days*100)/100)+" days");
+    const svc=(records||[]).filter(r=>r.unitId===u.id&&r.kind==="Service"&&r.status!=="open"&&r.stage!=="rejected").sort((a,b)=>String(b.date||"").localeCompare(String(a.date||""))||String(b.createdAt||"").localeCompare(String(a.createdAt||"")))[0];
+    const levelId=("lv"+String(u.id).replace(/[^A-Za-z0-9]/g,"")).slice(0,40);
+    const taskId=("tk"+String(u.id).replace(/[^A-Za-z0-9]/g,"")).slice(0,40);
+    out.push({level:{id:levelId.length>=4?levelId:"lvlegacy",unitId:u.id,name,basis,everyMeter:hrs>0?hrs:0,everyDays:days>0?days:0,active:"yes",legacy:"yes",notes:"Migrated from the single PM interval on this unit.",createdAt:""},task:{id:taskId.length>=4?taskId:"tklegacy",unitId:u.id,levelId:levelId.length>=4?levelId:"lvlegacy",name:"Scheduled service",instructions:"",partsJson:"[]",active:"yes",lastCompletedAt:svc&&svc.date?String(svc.date).slice(0,10):"",lastMeter:svc&&numv(svc.meter)>0?numv(svc.meter):"",lastWoId:svc?svc.id:"",createdAt:""}});
+  });
+  return out;
+}
+
 /* ---------- Data: Google Sheets via Apps Script ---------- */
 const SCRIPT_URL=(window.FLEET_SCRIPT_URL||"").trim();
 const CODE_KEY="fml-code";
@@ -1082,13 +1668,20 @@ async function call(action,payload){
   return j;
 }
 const genId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+function applySettings(rows){const row=(rows||[]).find(r=>r&&r.id==="prefs");S.settings=Object.assign({},PREFS,row||{})}
+function takeList(j){
+  S.units=j.units||[];S.records=j.records||[];S.employees=j.employees||[];S.checks=j.checks||[];
+  S.levels=j.levels||[];S.pmTasks=j.pmTasks||[];S.checklists=j.checklists||[];
+  applySettings(j.settings);S.status="ready";
+}
 const api={collection(name){return{doc(id){id=id||genId();return{id,
   set:async d=>{await call("set",{collection:name,id,data:d});await load()},
   update:async d=>{await call("update",{collection:name,id,data:d});await load()},
-  delete:async()=>{await call("delete",{collection:name,id});await load()}}}}}};
+  delete:async()=>{await call("delete",{collection:name,id});await load()}}}}},
+  batch:async ops=>{if(!ops||!ops.length)return;await call("batch",{ops});await load()}};
 async function load(){
   if(!code)return;
-  try{const j=await call("list");S.units=j.units||[];S.records=j.records||[];S.employees=j.employees||[];S.checks=j.checks||[];S.status="ready";$("#banner").innerHTML="";render();openPendingWO()}
+  try{const j=await call("list");takeList(j);$("#banner").innerHTML="";render();openPendingWO()}
   catch(e){if(e.code!=="unauthorized")$("#banner").innerHTML=`<div class="banner">Can't reach the fleet log right now. Check your signal; it will try again.</div>`}
 }
 function askCode(wrong){
@@ -1098,13 +1691,91 @@ function askCode(wrong){
     ()=>{const i=$("#sc");setTimeout(()=>i.focus(),50);const go=()=>{const v=i.value.trim();if(!v)return;code=v;try{localStorage.setItem(CODE_KEY,v)}catch(_){}closeSheet();load()};
       $("#scGo").onclick=go;i.onkeydown=e=>{if(e.key==="Enter")go()}});
 }
-if(!SCRIPT_URL||/^PASTE/i.test(SCRIPT_URL)){
+const SAMPLE_KEY="fml-sample-v1";
+function tinyPhoto(){
+  try{const c=document.createElement("canvas");c.width=320;c.height=240;const g=c.getContext("2d");
+    g.fillStyle="#26303a";g.fillRect(0,0,320,240);g.fillStyle="#c2410c";g.fillRect(0,168,320,72);
+    g.fillStyle="#f2f0eb";g.font="bold 28px sans-serif";g.fillText("Seat belt",18,64);g.font="16px sans-serif";g.fillText("FL-07 · won't latch",18,98);
+    return c.toDataURL("image/jpeg",0.7)}catch(_){return""}
+}
+function seedSample(){
+  const t=today(),day=n=>addDays(t,n),photo=tinyPhoto();
+  const units=[
+    {id:"fl07unit",unit:"FL-07",type:"Forklift",name:"5,000 lb LP, Bay 2",make:"Toyota",model:"8FGCU25",year:"2016",serial:"FL-77821",meterType:"Hours",meter:2300,pmMeter:250,pmDays:null,status:"Running",notes:"Propane cage by the north door.",createdAt:day(-400)+"T12:00:00.000Z",warrantyExpires:day(200),certExpires:"",registrationExpires:""},
+    {id:"tk02unit",unit:"TK-2",type:"Truck",name:"Box truck",make:"Isuzu",model:"NPR",year:"2019",serial:"54DC4W1B9KS123456",meterType:"Miles",meter:84220,pmMeter:null,pmDays:90,status:"Running",notes:"",createdAt:day(-300)+"T12:00:00.000Z",warrantyExpires:day(400),certExpires:day(-5),registrationExpires:day(12)},
+    {id:"ac01unit",unit:"AC-1",type:"Air compressor",name:"Shop air, north wall",make:"Ingersoll",model:"2475",year:"2012",serial:"AC-1009",meterType:"Hours",meter:1510,pmMeter:null,pmDays:null,status:"Running",notes:"",createdAt:day(-800)+"T12:00:00.000Z",warrantyExpires:"",certExpires:"",registrationExpires:""},
+    {id:"gn01unit",unit:"GN-1",type:"Generator",name:"Standby, loading dock",make:"Generac",model:"22kW",year:"2020",serial:"GN-220",meterType:"Hours",meter:640,pmMeter:null,pmDays:null,status:"Running",notes:"",createdAt:day(-200)+"T12:00:00.000Z",warrantyExpires:day(6),certExpires:"",registrationExpires:""},
+    {id:"tr04unit",unit:"TR-4",type:"Trailer",name:"Flatbed",make:"Big Tex",model:"14FT",year:"2014",serial:"TR4-14",meterType:"None",meter:null,pmMeter:null,pmDays:null,status:"Down",notes:"Deck boards soft near the rear.",createdAt:day(-500)+"T12:00:00.000Z",warrantyExpires:"",certExpires:"",registrationExpires:day(20)}
+  ];
+  const records=[
+    {id:"svcfork1",date:day(-40),unitId:"fl07unit",unitNumber:"FL-07",kind:"Service",status:"done",stage:"done",description:"250 hour service",parts:"Oil filter, engine oil",meter:2000,laborHours:1.5,partsCost:48,laborCost:0,otherCost:0,vendor:"In-house",workDone:"Changed oil and filter",priority:"Normal",downtimeHours:1,createdAt:day(-40)+"T15:00:00.000Z",updatedAt:day(-40)+"T15:00:00.000Z"},
+    {id:"svctk002",date:day(-10),unitId:"tk02unit",unitNumber:"TK-2",kind:"Service",status:"done",stage:"done",description:"90 day service",meter:83000,priority:"Normal",createdAt:day(-10)+"T12:00:00.000Z",updatedAt:day(-10)+"T12:00:00.000Z"},
+    {id:"woappro1",date:day(-1),unitId:"fl07unit",unitNumber:"FL-07",kind:"Repair",status:"open",stage:"approval",description:"Seat belt is frayed and won't latch",priority:"High",requestedBy:"Ana Ruiz",assignedTo:"mikejohn",assignedName:"Mike Johnson",dueDate:day(1),photos:photo?JSON.stringify([{id:"phseat01",name:"seat.jpg",url:photo,thumb:photo,fileId:"local",shared:true}]):"[]",createdAt:day(-1)+"T13:00:00.000Z",updatedAt:day(-1)+"T13:00:00.000Z"},
+    {id:"wolate001",date:t,unitId:"ac01unit",unitNumber:"AC-1",kind:"Repair",status:"open",stage:"in_progress",description:"Air leak at the tank drain",priority:"Normal",assignedTo:"mikejohn",assignedName:"Mike Johnson",dueDate:day(-2),downtimeHours:6.5,createdAt:t+"T08:00:00.000Z",updatedAt:t+"T08:00:00.000Z"},
+    {id:"woold001",date:day(-40),unitId:"tr04unit",unitNumber:"TR-4",kind:"Repair",status:"done",stage:"done",description:"Replaced a deck board",downtimeHours:20,partsCost:35,laborCost:0,otherCost:0,createdAt:day(-40)+"T12:00:00.000Z",updatedAt:day(-40)+"T12:00:00.000Z"}
+  ];
+  const employees=[
+    {id:"mikejohn",name:"Mike Johnson",role:"Mechanic",phone:"910-555-0142",email:"mike@example.com",smsCarrier:"vtext.com",createdAt:day(-100)+"T12:00:00.000Z"},
+    {id:"anaruiz1",name:"Ana Ruiz",role:"Supervisor",phone:"910-555-0198",email:"ana@example.com",smsCarrier:"txt.att.net",createdAt:day(-100)+"T12:00:00.000Z"}
+  ];
+  const checks=[{id:"chkpass1",unitId:"fl07unit",unitNumber:"FL-07",unitType:"Forklift",date:day(-1),at:day(-1)+"T06:40:00.000Z",driver:"Mike Johnson",driverId:"mikejohn",shift:"Day",meter:2280,result:"Pass",notes:"",items:"[]",defects:"",photos:"[]",workOrderId:"",createdAt:day(-1)+"T06:40:00.000Z"}];
+  const levels=[
+    {id:"lvweekly",unitId:"ac01unit",name:"Weekly",basis:"calendar",everyDays:7,everyMeter:0,active:"yes",legacy:"no",notes:"",createdAt:day(-80)+"T12:00:00.000Z"},
+    {id:"lv500hrs",unitId:"ac01unit",name:"500 hrs",basis:"meter",everyDays:0,everyMeter:500,active:"yes",legacy:"no",notes:"",createdAt:day(-80)+"T12:00:00.000Z"}
+  ];
+  const pmTasks=[
+    {id:"tkweekly",unitId:"ac01unit",levelId:"lvweekly",name:"Drain the tank",instructions:"Open the drain until the water stops, then close it.",partsJson:"[]",active:"yes",lastCompletedAt:day(-12),lastMeter:"",lastWoId:"",createdAt:day(-80)+"T12:00:00.000Z"},
+    {id:"tk500hrs",unitId:"ac01unit",levelId:"lv500hrs",name:"Oil and belt",instructions:"Change compressor oil and check the belt.",partsJson:JSON.stringify([{qty:"1",no:"CP-OIL",desc:"Compressor oil",cost:"18"}]),active:"yes",lastCompletedAt:day(-20),lastMeter:1400,lastWoId:"",createdAt:day(-80)+"T12:00:00.000Z"}
+  ];
+  const settings=[{id:"prefs",digestOn:"yes",dateSoonDays:30,recipients:JSON.stringify(["mikejohn","anaruiz1"]),includeSms:"yes",appUrl:"",updatedAt:t}];
+  return {units,records,employees,checks,levels,pmTasks,checklists:[],settings};
+}
+function startSample(){
+  S.sample=true;S.canWrite=true;S.dl=downloader;
+  let bag;try{bag=JSON.parse(localStorage.getItem(SAMPLE_KEY)||"")}catch(_){bag=null}
+  if(!bag||!Array.isArray(bag.units)||!bag.units.length)bag=seedSample();
+  ["units","records","employees","checks","levels","pmTasks","checklists","settings"].forEach(k=>{if(!Array.isArray(bag[k]))bag[k]=[]});
+  const sync=()=>{
+    takeList(bag);
+    const plan=planLegacyClient(S.units,S.records,S.levels);
+    if(plan.length){
+      const now=new Date().toISOString();
+      plan.forEach(p=>{p.level.createdAt=now;p.task.createdAt=now;bag.levels.push(p.level);bag.pmTasks.push(p.task)});
+      try{localStorage.setItem(SAMPLE_KEY,JSON.stringify(bag))}catch(_){}
+      takeList(bag);
+    }
+    S.sample=true;S.status="ready";
+  };
+  const write=(op)=>{
+    const list=bag[op.collection];if(!list)throw{code:"server",message:"unknown collection"};
+    if(op.op==="delete"){const i=list.findIndex(x=>x.id===op.id);if(i>=0)list.splice(i,1);return}
+    const data=Object.assign({},op.data||{});
+    if(op.collection==="records")data.total=numv(data.partsCost)+numv(data.laborCost)+numv(data.otherCost);
+    const i=list.findIndex(x=>x.id===op.id);
+    if(op.op==="update"){if(i<0)throw{code:"server",message:"not found"};list[i]=Object.assign({},list[i],data,{id:op.id})}
+    else if(i<0)list.push(Object.assign({},data,{id:op.id}));else list[i]=Object.assign({},data,{id:op.id});
+  };
+  const commit=async ops=>{ops.forEach(write);try{localStorage.setItem(SAMPLE_KEY,JSON.stringify(bag))}catch(_){}sync();$("#banner").innerHTML=sampleBanner();render();const b=$("#sampleReset");if(b)b.onclick=reset};
+  S.db={collection(name){return{doc(id){id=id||genId();return{id,
+    set:async d=>{await commit([{op:"set",collection:name,id,data:d}])},
+    update:async d=>{await commit([{op:"update",collection:name,id,data:d}])},
+    delete:async()=>{await commit([{op:"delete",collection:name,id}])}}}}},
+    batch:async ops=>{await commit(ops||[])}};
+  function sampleBanner(){return `<div class="banner">Sample fleet on this phone only. Nothing here is written to the shop sheet. <button type="button" class="btn small" id="sampleReset">Reset sample</button></div>`}
+  function reset(){try{localStorage.removeItem(SAMPLE_KEY)}catch(_){}bag=seedSample();sync();$("#banner").innerHTML=sampleBanner();render();const b=$("#sampleReset");if(b)b.onclick=reset;toast("Sample fleet reset")}
+  sync();$("#banner").innerHTML=sampleBanner();render();openPendingWO();
+  const b=$("#sampleReset");if(b)b.onclick=reset;
+}
+const SAMPLE=/[?&]sample=1(?:&|$)/.test(location.search);
+const downloader={save:async({filename,data})=>{const type=/\.csv$/.test(filename)?"text/csv;charset=utf-8":/\.xlsx$/.test(filename)?"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":"text/html;charset=utf-8";const url=URL.createObjectURL(data instanceof Blob?data:new Blob([data],{type}));
+  const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000)}};
+if(SAMPLE){startSample()}
+else if(!SCRIPT_URL||/^PASTE/i.test(SCRIPT_URL)){
   S.canWrite=false;S.status="none";
   $("#banner").innerHTML=`<div class="banner">Setup needed: paste your Google Apps Script web app URL into index.html (see README).</div>`;render();
 }else{
   S.db=api;
-  S.dl={save:async({filename,data})=>{const type=/\.csv$/.test(filename)?"text/csv;charset=utf-8":"text/html;charset=utf-8";const url=URL.createObjectURL(data instanceof Blob?data:new Blob([data],{type}));
-    const a=document.createElement("a");a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000)}};
+  S.dl=downloader;
   if(code)load();else askCode(false);
   const idle=()=>!document.hidden&&!$("#scrim")&&!(document.activeElement&&/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName));
   setInterval(()=>{if(idle())load()},60000);
